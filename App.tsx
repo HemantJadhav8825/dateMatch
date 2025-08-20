@@ -9,19 +9,20 @@ const AppNavigator = () => {
   const [loading, setLoading] = useState(false);
   const [userToken, setUserToken] = useState<any>(null);
 
-  // useEffect(() => {
-  //   const checkToken = async () => {
-  //     try {
-  //       const token = await AsyncStorage.getItem('userToken');
-  //       setUserToken(token);
-  //     } catch (e) {
-  //       console.error('Failed to load token');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   checkToken();
-  // }, []);
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        console.log({token})
+        setUserToken(token);
+      } catch (e) {
+        console.error('Failed to load token');
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkToken();
+  }, []);
 
   if (loading) {
     return (

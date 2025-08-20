@@ -1,4 +1,4 @@
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import {
     View,
@@ -17,14 +17,14 @@ const SettingsScreen = ({ navigation }) => {
     const onLogout = () => {
         // clear token, navigate to login
         console.log('User logged out');
-        // AsyncStorage.clear()
-        //     .then(() => {
-        //         console.log("AsyncStorage has been cleared");
-        //         navigation.navigate('Login');
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error clearing AsyncStorage", error);
-        //     });
+        AsyncStorage.clear()
+            .then(() => {
+                console.log("AsyncStorage has been cleared");
+                navigation.navigate('Login');
+            })
+            .catch((error) => {
+                console.error("Error clearing AsyncStorage", error);
+            });
     }
 
     const onChangeTheme = (isDark) => {

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import axiosClient from '../api/axiosClient';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const OtpScreen = ({ navigation, route }) => {
   const { phone } = route.params;
@@ -63,7 +63,7 @@ const OtpScreen = ({ navigation, route }) => {
       const data = res?.data;
 
       if (data?.success && data.token) {
-        // await AsyncStorage.setItem('userToken', data.token);
+        await AsyncStorage.setItem('userToken', data.token);
         navigation.replace('Home');
       } else {
         Alert.alert('Invalid OTP', 'OTP verification failed');
