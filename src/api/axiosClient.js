@@ -1,8 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseURL = 'http://10.0.2.2:9000/api';
-// const baseURL = 'https://match-voice-be.vercel.app/api';
+// const baseURL = 'http://10.0.2.2:9000/api';
+const baseURL = 'https://date-match-be.onrender.com/api';
 
 const axiosClient = axios.create({
   baseURL,
