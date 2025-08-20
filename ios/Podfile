@@ -5,10 +5,12 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, '13.0'   # ✅ Set a real iOS version
+platform :ios, '14.0'   # RN 0.81 requires iOS 14.0 minimum
+
 prepare_react_native_project!
 
-use_frameworks! :linkage => :static   # ✅ Use static frameworks unless you really need dynamic
+# Use static frameworks unless dynamic is required
+use_frameworks! :linkage => :static
 
 target 'dateMatch' do
   config = use_native_modules!
@@ -24,5 +26,12 @@ target 'dateMatch' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
+
+    # Force all pods to use iOS 14.0 as minimum
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+      end
+    end
   end
 end
