@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import styles  from './styles';
+import createStyles from './styles'; // we will modify this
+import { ThemeContext } from '../../theme/ThemeContext';
 
 const user = {
   name: 'Hemant Sharma',
@@ -16,17 +17,17 @@ const user = {
   photoUrl: 'https://cdn.pixabay.com/photo/2021/04/01/21/25/alone-boy-6143295_1280.jpg',
 };
 
-const onEditProfile = (field) => {
-  console.log('Edit', field);
-  // Navigate to edit screen or show modal for editing that field
-};
-
-const onLogout = () => {
-  console.log('Logout');
-  // Clear AsyncStorage token, navigate to login screen, etc.
-};
-
 const ProfileScreen = () => {
+  const { theme } = useContext(ThemeContext);
+  const styles = createStyles(theme);
+
+  const onEditProfile = (field) => {
+    console.log('Edit', field);
+  };
+
+  const onLogout = () => {
+    console.log('Logout');
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -35,11 +36,14 @@ const ProfileScreen = () => {
           source={
             user.photoUrl
               ? { uri: user.photoUrl }
-              : require('../../assets/bg.png') // fallback avatar
+              : require('../../assets/bg.png')
           }
           style={styles.avatar}
         />
-        <TouchableOpacity style={styles.editAvatarBtn} onPress={() => onEditProfile('photo')}>
+        <TouchableOpacity
+          style={styles.editAvatarBtn}
+          onPress={() => onEditProfile('photo')}
+        >
           <Text style={styles.editAvatarText}>Edit</Text>
         </TouchableOpacity>
       </View>
@@ -71,7 +75,9 @@ const ProfileScreen = () => {
 
       <View style={styles.infoSection}>
         <Text style={styles.label}>Bio</Text>
-        <Text style={[styles.infoText, styles.bioText]}>{user.bio || 'No bio added'}</Text>
+        <Text style={[styles.infoText, styles.bioText]}>
+          {user.bio || 'No bio added'}
+        </Text>
         <TouchableOpacity onPress={() => onEditProfile('bio')}>
           <Text style={styles.editText}>Edit Bio</Text>
         </TouchableOpacity>
