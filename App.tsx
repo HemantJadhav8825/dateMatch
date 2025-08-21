@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
-
 import StackNavigator from './src/navigation/StackNavigator';
 
 const AppNavigator = () => {
@@ -34,7 +33,7 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      <StackNavigator initialRouteName={userToken ? 'Home' : 'Login'} />
+      <StackNavigator initialRouteName={userToken ? 'Home' : 'Home'} />
     </NavigationContainer>
   );
 };
