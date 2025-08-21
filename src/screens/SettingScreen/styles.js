@@ -11,7 +11,7 @@ export default function getStyles(theme) {
       fontSize: 28,
       fontWeight: '700',
       marginBottom: 30,
-      color: theme.colors.text, // dynamic
+      color: theme.colors.text,
     },
     settingRow: {
       flexDirection: 'row',
@@ -21,7 +21,7 @@ export default function getStyles(theme) {
     },
     label: {
       fontSize: 16,
-      color: theme.colors.text, // dynamic
+      color: theme.colors.text,
     },
     button: {
       backgroundColor: theme.colors.primary,
@@ -31,16 +31,16 @@ export default function getStyles(theme) {
       alignItems: 'center',
     },
     buttonText: {
-      color: theme.colors.text, // or theme.colors.textDark if needed
+      color: theme.dark ? '#fff' : '#fff', // stays visible for both
       fontWeight: '600',
       fontSize: 16,
     },
     logoutButton: {
-      backgroundColor: '#ff4d4d', // can also move to theme
+      backgroundColor: '#ff4d4d',
     },
     logoutButtonText: {
       fontWeight: '700',
-      color: theme.colors.text,
+      color: '#fff',
     },
   });
 }

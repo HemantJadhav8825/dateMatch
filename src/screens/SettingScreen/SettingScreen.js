@@ -12,7 +12,7 @@ import getStyles from './styles';
 
 const SettingsScreen = ({ navigation }) => {
   const { isDark, theme, toggleTheme } = useContext(ThemeContext);
-  const styles = getStyles(theme); // <-- dynamic styles
+  const styles = getStyles(theme); // dynamic styles based on theme
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const onLogout = () => {
@@ -20,13 +20,15 @@ const SettingsScreen = ({ navigation }) => {
     navigation.navigate('Login');
   };
 
+  const toggleNotifications = () => setNotificationsEnabled((prev) => !prev);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.settingRow}>
         <Text style={styles.label}>Enable Notifications</Text>
         <Switch
           value={notificationsEnabled}
-          onValueChange={() => setNotificationsEnabled(prev => !prev)}
+          onValueChange={toggleNotifications}
           thumbColor={notificationsEnabled ? theme.colors.primary : '#ccc'}
         />
       </View>
@@ -48,7 +50,10 @@ const SettingsScreen = ({ navigation }) => {
         <Text style={styles.buttonText}>Privacy Policy</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.button, styles.logoutButton]}>
+      <TouchableOpacity
+        style={[styles.button, styles.logoutButton]}
+        onPress={onLogout}
+      >
         <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
     </ScrollView>
