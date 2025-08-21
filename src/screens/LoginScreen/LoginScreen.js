@@ -10,9 +10,21 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import axiosClient from '../../api/axiosClient';
-import styles from './styles';
+import { useTheme } from '@react-navigation/native'; // 👈 for theme
+import createStyles from './styles';
 
 const LoginScreen = ({ navigation }) => {
+  const { colors, dark } = useTheme(); // 👈 get theme colors and dark mode flag
+  const styles = createStyles({
+    colors: {
+      ...colors,
+      subtext: dark ? '#aaa' : '#666',
+      inputBackground: dark ? '#222' : '#f9f9f9',
+      primaryDisabled: dark ? '#555' : '#a3bffa',
+    },
+    isDark: dark,
+  });
+
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +47,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <ImageBackground
-      source={require('../../assets/bg.png')} // 👈 Replace with your image path
+      source={require('../../assets/bg.png')}
       style={styles.background}
       resizeMode="cover"
     >
@@ -52,7 +64,7 @@ const LoginScreen = ({ navigation }) => {
             onChangeText={setPhone}
             keyboardType="phone-pad"
             placeholder="Phone Number"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={dark ? '#888' : '#aaa'}
             maxLength={10}
             style={styles.input}
             editable={!loading}
