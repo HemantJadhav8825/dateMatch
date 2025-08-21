@@ -12,8 +12,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import axiosClient from '../api/axiosClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const OtpScreen = ({ navigation, route }) => {
-  const { phone } = route.params;
+const OtpScreen = ({ navigation = {}, route = {} }) => {
+  const { phone = '9503760623' } = route.params || {};
   const inputRefs = useRef([]);
   const [otp, setOtp] = useState(['', '', '', '']);
   const [loading, setLoading] = useState(false);
@@ -64,7 +64,7 @@ const OtpScreen = ({ navigation, route }) => {
 
       if (data?.success && data.token) {
         await AsyncStorage.setItem('userToken', data.token);
-        navigation.replace('Home');
+        navigation?.replace('Home');
       } else {
         Alert.alert('Invalid OTP', 'OTP verification failed');
       }
@@ -114,10 +114,12 @@ const OtpScreen = ({ navigation, route }) => {
 
 export default OtpScreen;
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 30,
+    width: '100%',
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -140,7 +142,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     fontSize: 20,
     color: '#000',
-    elevation: 3,
+    textAlign: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   inputDisabled: {
     backgroundColor: '#ddd',
@@ -151,6 +164,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
     borderRadius: 25,
     alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   buttonDisabled: {
     backgroundColor: '#ccc',
@@ -161,3 +185,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
+
