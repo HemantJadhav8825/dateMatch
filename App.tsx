@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NavigationContainer } from '@react-navigation/native';
 import StackNavigator from './src/navigation/StackNavigator';
 
 const AppNavigator = () => {
@@ -12,7 +11,7 @@ const AppNavigator = () => {
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem('userToken');
-        console.log({token})
+        console.log({ token })
         setUserToken(token);
       } catch (e) {
         console.error('Failed to load token');
@@ -25,16 +24,14 @@ const AppNavigator = () => {
 
   if (loading) {
     return (
-      <View style={{ flex:1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
       </View>
     );
   }
 
   return (
-    <NavigationContainer>
-      <StackNavigator initialRouteName={userToken ? 'Home' : 'Home'} />
-    </NavigationContainer>
+    <StackNavigator initialRouteName={userToken ? 'Home' : 'Home'} />
   );
 };
 

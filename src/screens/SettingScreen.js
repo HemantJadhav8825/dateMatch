@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
     View,
     Text,
@@ -9,39 +8,26 @@ import {
     ScrollView,
     Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ThemeContext } from '../theme/ThemeContext'; // adjust path as needed
 
 const SettingsScreen = ({ navigation }) => {
+    const { isDark, toggleTheme } = useContext(ThemeContext);
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-    const [isDarkTheme, setIsDarkTheme] = useState(false);
 
     const onLogout = () => {
-        // clear token, navigate to login
-        console.log('User logged out');
         AsyncStorage.clear()
             .then(() => {
-                console.log("AsyncStorage has been cleared");
                 navigation.navigate('Login');
             })
-            .catch((error) => {
-                console.error("Error clearing AsyncStorage", error);
-            });
-    }
-
-    const onChangeTheme = (isDark) => {
-        console.log('Theme changed:', isDark ? 'Dark' : 'Light');
-    }
+            .catch((error) => console.error("Error clearing AsyncStorage", error));
+    };
 
     const onViewPrivacy = () => {
-        // navigate to privacy policy screen or open URL
-        console.log('Privacy Policy tapped');
-    }
+        Alert.alert('Privacy Policy', 'Feature coming soon!');
+    };
 
     const toggleNotifications = () => setNotificationsEnabled((prev) => !prev);
-    const toggleTheme = () => {
-        const newTheme = !isDarkTheme;
-        setIsDarkTheme(newTheme);
-        onChangeTheme && onChangeTheme(newTheme);
-    };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -57,9 +43,9 @@ const SettingsScreen = ({ navigation }) => {
             <View style={styles.settingRow}>
                 <Text style={styles.label}>Dark Theme</Text>
                 <Switch
-                    value={isDarkTheme}
+                    value={isDark}
                     onValueChange={toggleTheme}
-                    thumbColor={isDarkTheme ? '#4a00e0' : '#ccc'}
+                    thumbColor={isDark ? '#4a00e0' : '#ccc'}
                 />
             </View>
 
