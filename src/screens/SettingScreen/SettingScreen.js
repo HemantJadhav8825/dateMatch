@@ -1,67 +1,58 @@
 import React, { useState, useContext } from 'react';
 import {
-    View,
-    Text,
-    Switch,
-    TouchableOpacity,
-    ScrollView,
-    Alert,
+  View,
+  Text,
+  Switch,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemeContext } from '../../theme/ThemeContext'; // adjust path as needed
-import styles from './styles';
+import { ThemeContext } from '../../theme/ThemeContext';
+import getStyles from './styles';
 
 const SettingsScreen = ({ navigation }) => {
-    const { isDark, toggleTheme } = useContext(ThemeContext);
-    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const { isDark, theme, toggleTheme } = useContext(ThemeContext);
+  const styles = getStyles(theme); // <-- dynamic styles
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
-    const onLogout = () => {
-        AsyncStorage.clear()
-            .then(() => {
-                navigation.navigate('Login');
-            })
-            .catch((error) => console.error("Error clearing AsyncStorage", error));
-    };
+  const onLogout = () => {
+    Alert.alert('Logged out');
+    navigation.navigate('Login');
+  };
 
-    const onViewPrivacy = () => {
-        Alert.alert('Privacy Policy', 'Feature coming soon!');
-    };
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.settingRow}>
+        <Text style={styles.label}>Enable Notifications</Text>
+        <Switch
+          value={notificationsEnabled}
+          onValueChange={() => setNotificationsEnabled(prev => !prev)}
+          thumbColor={notificationsEnabled ? theme.colors.primary : '#ccc'}
+        />
+      </View>
 
-    const toggleNotifications = () => setNotificationsEnabled((prev) => !prev);
+      <View style={styles.settingRow}>
+        <Text style={styles.label}>Dark Theme</Text>
+        <Switch
+          value={isDark}
+          onValueChange={toggleTheme}
+          thumbColor={isDark ? theme.colors.primary : '#ccc'}
+        />
+      </View>
 
-    return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <View style={styles.settingRow}>
-                <Text style={styles.label}>Enable Notifications</Text>
-                <Switch
-                    value={notificationsEnabled}
-                    onValueChange={toggleNotifications}
-                    thumbColor={notificationsEnabled ? '#4a00e0' : '#ccc'}
-                />
-            </View>
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>Account Info</Text>
+      </TouchableOpacity>
 
-            <View style={styles.settingRow}>
-                <Text style={styles.label}>Dark Theme</Text>
-                <Switch
-                    value={isDark}
-                    onValueChange={toggleTheme}
-                    thumbColor={isDark ? '#4a00e0' : '#ccc'}
-                />
-            </View>
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>Privacy Policy</Text>
+      </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={() => Alert.alert('Account Info', 'Feature coming soon!')}>
-                <Text style={styles.buttonText}>Account Info</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.button} onPress={onViewPrivacy}>
-                <Text style={styles.buttonText}>Privacy Policy</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={onLogout}>
-                <Text style={[styles.buttonText, styles.logoutButtonText]}>Logout</Text>
-            </TouchableOpacity>
-        </ScrollView>
-    );
+      <TouchableOpacity style={[styles.button, styles.logoutButton]}>
+        <Text style={styles.logoutButtonText}>Logout</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
 };
 
 export default SettingsScreen;

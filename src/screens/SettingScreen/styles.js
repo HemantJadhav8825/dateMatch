@@ -1,45 +1,46 @@
-const { StyleSheet } = require("react-native");
+import { StyleSheet } from 'react-native';
 
-const styles = StyleSheet.create({
+export default function getStyles(theme) {
+  return StyleSheet.create({
     container: {
-        padding: 25,
-        backgroundColor: '#fff',
-        flexGrow: 1,
+      padding: 25,
+      backgroundColor: theme.colors.background,
+      flexGrow: 1,
     },
     title: {
-        fontSize: 28,
-        fontWeight: '700',
-        marginBottom: 30,
-        color: '#222',
+      fontSize: 28,
+      fontWeight: '700',
+      marginBottom: 30,
+      color: theme.colors.text, // dynamic
     },
     settingRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 25,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 25,
     },
     label: {
-        fontSize: 16,
-        color: '#444',
+      fontSize: 16,
+      color: theme.colors.text, // dynamic
     },
     button: {
-        backgroundColor: '#4a00e0',
-        paddingVertical: 15,
-        borderRadius: 10,
-        marginBottom: 15,
-        alignItems: 'center',
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 15,
+      borderRadius: 10,
+      marginBottom: 15,
+      alignItems: 'center',
     },
     buttonText: {
-        color: '#fff',
-        fontWeight: '600',
-        fontSize: 16,
+      color: theme.colors.text, // or theme.colors.textDark if needed
+      fontWeight: '600',
+      fontSize: 16,
     },
     logoutButton: {
-        backgroundColor: '#ff4d4d',
+      backgroundColor: '#ff4d4d', // can also move to theme
     },
     logoutButtonText: {
-        fontWeight: '700',
+      fontWeight: '700',
+      color: theme.colors.text,
     },
-});
-
-export default styles;
+  });
+}
