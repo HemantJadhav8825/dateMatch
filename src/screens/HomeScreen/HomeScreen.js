@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,15 @@ import {
   Image,
   FlatList
 } from 'react-native';
-import { avatars, roomTypes } from "../../constants/homeScreenConstants"
-import styles from './styles';
+import createStyles from './styles'; // <-- We'll change this to a function
+
+import { avatars, roomTypes } from "../../constants/homeScreenConstants";
+import { ThemeContext } from '../../theme/ThemeContext';
 
 const HomeScreen = () => {
+  const { theme } = useContext(ThemeContext);
+  const styles = createStyles(theme); // <-- pass theme to styles
+
   const renderAvatar = ({ item }) => (
     <View style={styles.avatarCard}>
       <View style={styles.avatarImageWrapper}>
@@ -39,7 +44,7 @@ const HomeScreen = () => {
   );
 
   const renderRoom = ({ item }) => (
-    <TouchableOpacity style={[styles.roomCard, { backgroundColor: '#f0f0f0' }]}>
+    <TouchableOpacity style={styles.roomCard}>
       {item.badge && (
         <View style={styles.newBadge}>
           <Text style={styles.newBadgeText}>{item.badge}</Text>
@@ -53,7 +58,6 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Top avatars horizontal scroll */}
       <Text style={styles.sectionTitle}>Private Training</Text>
       <FlatList
         data={avatars}
@@ -64,7 +68,6 @@ const HomeScreen = () => {
         contentContainerStyle={{ paddingHorizontal: 15 }}
         style={{ marginBottom: 25 }}
       />
-      {/* Room Types */}
       <Text style={styles.sectionTitle}>All Room Types</Text>
       <FlatList
         data={roomTypes}
@@ -74,7 +77,6 @@ const HomeScreen = () => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 15 }}
       />
-      {/* Room Types */}
       <Text style={styles.sectionTitle}>Other Room Types</Text>
       <FlatList
         data={roomTypes}

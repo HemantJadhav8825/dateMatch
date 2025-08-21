@@ -6,21 +6,24 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  useColorScheme,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import axiosClient from '../../api/axiosClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import styles from './styles';
+import createStyles from './styles';
 
 const OtpScreen = ({ navigation = {}, route = {} }) => {
   const { phone = '9503760623' } = route.params || {};
+  const scheme = useColorScheme(); // 👈 Detects light or dark mode
+  const styles = createStyles(scheme); // 👈 Generate theme-based styles
+
   const inputRefs = useRef([]);
   const [otp, setOtp] = useState(['', '', '', '']);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (text, index) => {
-    if (loading) return; // prevent input while loading
-
+    if (loading) return;
     let newOtp = [...otp];
 
     if (text === '' && otp[index] === '' && index > 0) {
@@ -48,8 +51,7 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
   };
 
   const handleKeyPress = ({ nativeEvent }, index) => {
-    if (loading) return; // prevent input while loading
-
+    if (loading) return;
     if (nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1].focus();
     }
@@ -77,7 +79,10 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
   };
 
   return (
-    <LinearGradient colors={['#8e2de2', '#4a00e0']} style={styles.container}>
+    <LinearGradient
+      colors={scheme === 'dark' ? ['#141E30', '#243B55'] : ['#8e2de2', '#4a00e0']}
+      style={styles.container}
+    >
       <Text style={styles.title}>Enter OTP</Text>
 
       <View style={styles.otpContainer}>
@@ -103,7 +108,7 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator size="small" color="#4a00e0" />
+          <ActivityIndicator size="small" color={scheme === 'dark' ? '#fff' : '#4a00e0'} />
         ) : (
           <Text style={styles.submitText}>Verify</Text>
         )}

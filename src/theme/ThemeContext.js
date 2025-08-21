@@ -9,7 +9,7 @@ export const ThemeContext = createContext({
 });
 
 export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     // Load saved theme from storage

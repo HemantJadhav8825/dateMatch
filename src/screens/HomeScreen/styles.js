@@ -1,14 +1,13 @@
 const { StyleSheet, Dimensions } = require("react-native");
 const { height: height100vh, width: windowWidth } = Dimensions.get('window');
 
-
-const avatarSize = height100vh * 0.1; // 10% of screen height
+const avatarSize = height100vh * 0.1; 
 const avatarCardWidth = avatarSize + 20;
 
-const styles = StyleSheet.create({
+export default (theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.background,
     paddingTop: 20,
   },
   sectionTitle: {
@@ -16,11 +15,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginLeft: 15,
     marginBottom: 15,
-    color: '#222',
+    color: theme.colors.text,
   },
   avatarCard: {
-    width: avatarCardWidth, // Dynamically set the card width based on avatar size
-    backgroundColor: '#f9f9f9',
+    width: avatarCardWidth,
+    backgroundColor: theme.dark ? '#1e1e1e' : '#f9f9f9',
     borderRadius: 15,
     padding: 10,
     marginRight: 15,
@@ -33,7 +32,7 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: avatarSize,
     height: avatarSize,
-    borderRadius: avatarSize / 2, // Makes the avatar circular
+    borderRadius: avatarSize / 2,
   },
   avatarImageWrapper: {
     position: 'relative',
@@ -45,15 +44,15 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: '#4ade80', // green
+    backgroundColor: '#4ade80',
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: theme.colors.background,
   },
   starBadge: {
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: '#facc15', // yellow
+    backgroundColor: '#facc15',
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -62,7 +61,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: '#ef4444', // red
+    backgroundColor: '#ef4444',
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -76,22 +75,22 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontWeight: '600',
     fontSize: 14,
-    color: '#333',
+    color: theme.colors.text,
   },
   languageBadge: {
     marginTop: 4,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    backgroundColor: '#e0e7ff',
+    backgroundColor: theme.dark ? '#3730a3' : '#e0e7ff',
     borderRadius: 12,
   },
   languageText: {
     fontSize: 10,
-    color: '#4338ca',
+    color: theme.dark ? '#c7d2fe' : '#4338ca',
   },
   joinButton: {
     marginTop: 8,
-    backgroundColor: '#14b8a6',
+    backgroundColor: theme.colors.primary,
     paddingVertical: 6,
     paddingHorizontal: 18,
     borderRadius: 20,
@@ -106,6 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 15,
     marginRight: 15,
+    backgroundColor: theme.dark ? '#1f2937' : '#f0f0f0',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     left: 10,
-    backgroundColor: '#1d4ed8',
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -137,12 +137,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 14,
     textAlign: 'center',
+    color: theme.colors.text,
   },
   roomSubtitle: {
     fontSize: 12,
-    color: '#444',
+    color: theme.dark ? '#ccc' : '#444',
     marginTop: 4,
   },
 });
-
-export default styles;
