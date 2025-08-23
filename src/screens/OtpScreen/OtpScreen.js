@@ -10,11 +10,11 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import axiosClient from '../../api/axiosClient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import createStyles from './styles';
+import { setLocalStorage } from '../../utils';
 
 const OtpScreen = ({ navigation = {}, route = {} }) => {
-  const { phone = '9503760623' } = route.params || {};
+  const { phone = '9503760623', requestId } = route.params || {};
   const scheme = useColorScheme(); // 👈 Detects light or dark mode
   const styles = createStyles(scheme); // 👈 Generate theme-based styles
 
@@ -61,11 +61,12 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
     if (loading) return;
     setLoading(true);
     try {
-      const res = await axiosClient.post('/otp/verify', { phone, otp: code });
-      const data = res?.data;
+      const { data } = await axiosClient.post('/auth/otp/verify', { phone, requestId, code });
 
-      if (data?.success && data.token) {
-        await AsyncStorage.setItem('userToken', data.token);
+      if (data) {
+        await setLocalStorage('accessToken', data.accessToken);
+        await setLocalStorage('refreshToken', data.refreshToken);
+        await setLocalStorage('userId', data?.user?.id);
         navigation?.replace('Home');
       } else {
         Alert.alert('Invalid OTP', 'OTP verification failed');

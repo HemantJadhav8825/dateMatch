@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/LoginScreen/LoginScreen';
 import OtpScreen from '../screens/OtpScreen/OtpScreen';
 import BottomTabNavigator from './BottomTabNavigator';
+import CallScreen from '../screens/CallScreen/CallScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -11,6 +12,7 @@ const StackNavigator = ({initialRouteName}) => (
     <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
     <Stack.Screen name="Otp" component={OtpScreen} options={{ headerShown: false }} />
     <Stack.Screen name="Home" component={BottomTabNavigator} options={{ headerShown: false }} />
+    <Stack.Screen name="Call" component={CallScreen} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

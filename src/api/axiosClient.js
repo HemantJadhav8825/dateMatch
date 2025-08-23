@@ -1,8 +1,8 @@
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../utils';
 
-// const baseURL = 'http://10.0.2.2:9000/api';
-const baseURL = 'https://date-match-be.onrender.com/api';
+const baseURL = 'http://localhost:4000';
+// const baseURL = 'https://date-match-be.onrender.com/api';
 
 const axiosClient = axios.create({
   baseURL,
@@ -15,7 +15,7 @@ const axiosClient = axios.create({
 // Add async interceptor to inject token from AsyncStorage
 axiosClient.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem('userToken');
+    const token = await getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

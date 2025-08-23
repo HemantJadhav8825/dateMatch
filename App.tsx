@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import StackNavigator from './src/navigation/StackNavigator';
+import { getToken } from './src/utils/index'
 
 const AppNavigator = () => {
   const [loading, setLoading] = useState(false);
-  const [userToken, setUserToken] = useState<any>(null);
+  const [accessToken, setAccessToken] = useState<any>(null);
 
   useEffect(() => {
     const checkToken = async () => {
       try {
-        const token = await AsyncStorage.getItem('userToken');
-        console.log({ token })
-        setUserToken(token);
+        const token = await getToken();
+        setAccessToken(token);
       } catch (e) {
         console.error('Failed to load token');
       } finally {
@@ -31,7 +30,7 @@ const AppNavigator = () => {
   }
 
   return (
-    <StackNavigator initialRouteName={userToken ? 'Home' : 'Home'} />
+    <StackNavigator initialRouteName={accessToken ? 'Home' : 'Login'} />
   );
 };
 

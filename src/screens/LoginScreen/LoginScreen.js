@@ -32,8 +32,8 @@ const LoginScreen = ({ navigation }) => {
     if (phone.length === 10) {
       setLoading(true);
       try {
-        await axiosClient.post('/otp/send', { phone });
-        navigation.navigate('Otp', { phone });
+        const { data } = await axiosClient.post('/auth/otp/start', { phone });
+        navigation.navigate('Otp', { phone, requestId: data?.requestId });
       } catch (error) {
         console.error('Error:', error);
         alert('Failed to send OTP. Please try again.');
