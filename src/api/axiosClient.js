@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { getToken } from '../utils';
 
-const baseURL = 'http://localhost:4000';
-// const baseURL = 'https://date-match-be.onrender.com/api';
+// const baseURL = 'http://localhost:4000';
+const baseURL = 'https://gateway-gklf.onrender.com';
 
 const axiosClient = axios.create({
   baseURL,
