@@ -11,7 +11,7 @@ import createStyles from './styles'; // <-- We'll change this to a function
 import { avatars, roomTypes } from "../../constants/homeScreenConstants";
 import { ThemeContext } from '../../theme/ThemeContext';
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme); // <-- pass theme to styles
 
@@ -35,7 +35,7 @@ const HomeScreen = () => {
       <View style={styles.languageBadge}>
         <Text style={styles.languageText}>{item.language}</Text>
       </View>
-      <TouchableOpacity style={styles.joinButton}>
+      <TouchableOpacity onPress={() =>  navigation?.navigate('Call', {})} style={styles.joinButton}>
         <Text style={styles.joinButtonText}>
           {item.callType === 'video' ? '📹 Join' : '📞 Join'}
         </Text>
