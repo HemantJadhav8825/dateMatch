@@ -2,11 +2,14 @@ import { StyleSheet } from 'react-native';
 
 export const createStyles = (theme) =>
   StyleSheet.create({
+    background: {
+      flex: 1,
+      resizeMode: 'cover',
+      justifyContent: 'space-between',
+    },
     container: {
       flex: 1,
-      backgroundColor: theme.colors.background,
-      justifyContent: 'space-between',
-      paddingVertical: 40,
+      backgroundColor: 'rgba(0,0,0,0.5)', // overlay to improve readability
     },
     callerSection: {
       flex: 1,
@@ -14,42 +17,42 @@ export const createStyles = (theme) =>
       alignItems: 'center',
     },
     avatar: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      marginBottom: 20,
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      marginBottom: 16,
+      borderWidth: 2,
+      borderColor: '#fff',
     },
     callerName: {
       fontSize: 24,
-      fontWeight: '600',
+      fontWeight: 'bold',
       color: theme.colors.text,
-      marginBottom: 8,
+      marginBottom: 4,
     },
     callStatus: {
       fontSize: 16,
       color: theme.colors.text,
-      opacity: 0.7,
+      opacity: 0.8,
     },
     controls: {
       flexDirection: 'row',
-      justifyContent: 'space-around',
+      justifyContent: 'space-evenly',
       alignItems: 'center',
-      paddingHorizontal: 30,
-      marginBottom: 40,
+      padding: 24,
     },
     controlButton: {
       alignItems: 'center',
     },
     controlLabel: {
-      color: theme.colors.text,
-      marginTop: 6,
+      marginTop: 8,
       fontSize: 14,
-      opacity: 0.8,
+      color: theme.colors.text,
     },
     endCallButton: {
-      width: 70,
-      height: 70,
-      borderRadius: 35,
+      width: 64,
+      height: 64,
+      borderRadius: 32,
       justifyContent: 'center',
       alignItems: 'center',
     },
