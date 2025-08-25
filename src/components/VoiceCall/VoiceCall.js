@@ -1,90 +1,149 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, ImageBackground } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { ThemeContext } from '../../theme/ThemeContext';
-import { createStyles } from './styles';
-import Icon from 'react-native-vector-icons/Ionicons';
-import InCallManager from 'react-native-incall-manager'; // for audio control
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { View, Text, TouchableOpacity, ImageBackground } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ThemeContext } from "../../theme/ThemeContext";
+import { createStyles } from "./styles";
+import Icon from "react-native-vector-icons/Ionicons";
+import InCallManager from "react-native-incall-manager";
+import {
+  RTCPeerConnection,
+  mediaDevices,
+  RTCIceCandidate,
+  RTCSessionDescription,
+} from "react-native-webrtc";
+import io from "socket.io-client";
+import { useNavigation } from "@react-navigation/native";
 
-const VoiceCallScreen = () => {
+const VoiceCallScreen = ({ route }) => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme);
   const navigation = useNavigation();
 
+  const { token, room, isCaller } = route.params; // pass from previous screen
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
 
-  // Start call audio session when screen mounts
+  const pc = useRef(null);
+  const sigSocket = useRef(null);
+  const localStream = useRef(null);
+
   useEffect(() => {
-    InCallManager.start({ media: 'audio' });
+    InCallManager.start({ media: "audio" });
     InCallManager.setForceSpeakerphoneOn(false);
+
+    // 1. Create peer connection
+    pc.current = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    });
+
+    // send ICE candidates
+    pc.current.onicecandidate = (event) => {
+      if (event.candidate) {
+        sigSocket.current.emit("ice", { room, candidate: event.candidate });
+      }
+    };
+
+    // handle remote stream
+    pc.current.ontrack = (event) => {
+      console.log("Remote stream received");
+      // You can attach it to <RTCView /> if you want
+    };
+
+    // 2. Get local audio
+    mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      localStream.current = stream;
+      stream.getTracks().forEach((t) => pc.current.addTrack(t, stream));
+    });
+
+    // 3. Connect signaling
+    sigSocket.current = io("http://<SERVER_IP>:5004/signaling", {
+      auth: { token },
+    });
+
+    sigSocket.current.on("connect", () => {
+      sigSocket.current.emit("join", { room });
+    });
+
+    // handle offer/answer/ice
+    sigSocket.current.on("offer", async ({ sdp }) => {
+      await pc.current.setRemoteDescription(new RTCSessionDescription(sdp));
+      const answer = await pc.current.createAnswer();
+      await pc.current.setLocalDescription(answer);
+      sigSocket.current.emit("answer", { room, sdp: answer });
+    });
+
+    sigSocket.current.on("answer", async ({ sdp }) => {
+      await pc.current.setRemoteDescription(new RTCSessionDescription(sdp));
+    });
+
+    sigSocket.current.on("ice", async ({ candidate }) => {
+      await pc.current.addIceCandidate(new RTCIceCandidate(candidate));
+    });
+
+    // 4. Caller initiates offer
+    if (isCaller) {
+      (async () => {
+        const offer = await pc.current.createOffer();
+        await pc.current.setLocalDescription(offer);
+        sigSocket.current.emit("offer", { room, sdp: offer });
+      })();
+    }
 
     return () => {
       InCallManager.stop();
+      sigSocket.current?.disconnect();
+      pc.current?.close();
     };
   }, []);
 
+  // === Controls ===
   const toggleMute = () => {
-    setIsMuted(prev => !prev);
-    InCallManager.setMicrophoneMute(!isMuted);
+    setIsMuted((prev) => !prev);
+    localStream.current
+      ?.getAudioTracks()
+      .forEach((t) => (t.enabled = isMuted));
   };
 
   const toggleSpeaker = () => {
-    setIsSpeakerOn(prev => !prev);
+    setIsSpeakerOn((prev) => !prev);
     InCallManager.setForceSpeakerphoneOn(!isSpeakerOn);
   };
 
   const endCall = () => {
     InCallManager.stop();
-    navigation.navigate('Home'); // Navigate back to home or previous screen
+    sigSocket.current.emit("end", { room, reason: "hangup" });
+    pc.current?.close();
+    sigSocket.current?.disconnect();
+    navigation.navigate("Home");
   };
 
   return (
     <ImageBackground
-      source={{ uri: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg' }}
+      source={{ uri: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg" }}
       style={styles.background}
       blurRadius={1}
     >
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        
-        {/* Caller Info */}
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.callerSection}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/150' }}
-            style={styles.avatar}
-          />
-          <Text style={styles.callerName}>Shreya Kadam</Text>
+          <Text style={styles.callerName}>Audio Call</Text>
           <Text style={styles.callStatus}>
-            {isMuted ? 'Muted' : 'Voice Call in Progress'}
+            {isMuted ? "Muted" : "Voice Call in Progress"}
           </Text>
         </View>
 
-        {/* Controls */}
         <View style={styles.controls}>
-          {/* Mute */}
           <TouchableOpacity style={styles.controlButton} onPress={toggleMute}>
-            <Icon 
-              name={isMuted ? "mic-off" : "mic"} 
-              size={28} 
-              color={theme.colors.text} 
-            />
+            <Icon name={isMuted ? "mic-off" : "mic"} size={28} color={theme.colors.text} />
             <Text style={styles.controlLabel}>Mute</Text>
           </TouchableOpacity>
 
-          {/* Speaker */}
           <TouchableOpacity style={styles.controlButton} onPress={toggleSpeaker}>
-            <Icon 
-              name={isSpeakerOn ? "volume-high" : "volume-mute"} 
-              size={28} 
-              color={theme.colors.text} 
-            />
+            <Icon name={isSpeakerOn ? "volume-high" : "volume-mute"} size={28} color={theme.colors.text} />
             <Text style={styles.controlLabel}>Speaker</Text>
           </TouchableOpacity>
 
-          {/* End Call */}
           <TouchableOpacity
-            style={[styles.endCallButton, { backgroundColor: '#E53935' }]}
+            style={[styles.endCallButton, { backgroundColor: "#E53935" }]}
             onPress={endCall}
           >
             <Icon name="call" size={28} color="#fff" />

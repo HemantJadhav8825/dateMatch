@@ -1,40 +1,32 @@
-// CallNotifier.js (singleton)
-// usage: import notifier from './CallNotifier'; notifier.init({ token, userId });
+import io from "socket.io-client";
 
-import { io } from 'socket.io-client';
-const NOTIFY_URL = 'http://127.0.0.1:5004/notify'; // call-service notify namespace
+let notifySocket;
 
-class CallNotifier {
-  init({ token, userId, onIncoming }) {
-    this.socket = io('http://127.0.0.1:5004/notify', {
-      auth: { token },
-      transports: ['websocket']
-    });
+export function initNotifySocket(userId, token, onIncomingCall) {
+  notifySocket = io("http://<SERVER_IP>:5004/notify", {
+    auth: { token },
+  });
 
-    this.socket.on('connect', () => {
-      this.socket.emit('register', userId);
-    });
+  notifySocket.on("connect", () => {
+    notifySocket.emit("register", userId);
+    console.log("notify connected");
+  });
 
-    this.socket.on('incoming_call', (data) => {
-      // data: { sessionId, from, room }
-      onIncoming && onIncoming(data);
-    });
+  // incoming call event
+  notifySocket.on("incoming_call", (data) => {
+    console.log("Incoming call:", data);
+    onIncomingCall(data); // show call popup screen
+  });
 
-    this.socket.on('call_accepted', (data) => {
-      // caller receives this: { sessionId, room }
-      if (this.onCallAccepted) this.onCallAccepted(data);
-    });
-
-    this.socket.on('call_rejected', (data) => {
-      if (this.onCallRejected) this.onCallRejected(data);
-    });
-  }
-
-  accept(sessionId) {
-    this.socket.emit('call:accept', { sessionId });
-  }
-  reject(sessionId) {
-    this.socket.emit('call:reject', { sessionId });
-  }
+  // optional: listen to call accepted/rejected
+  notifySocket.on("call_accepted", (data) => console.log("Call accepted", data));
+  notifySocket.on("call_rejected", (data) => console.log("Call rejected", data));
 }
-export default new CallNotifier();
+
+export function acceptCall(sessionId) {
+  notifySocket.emit("call:accept", { sessionId });
+}
+
+export function rejectCall(sessionId) {
+  notifySocket.emit("call:reject", { sessionId });
+}

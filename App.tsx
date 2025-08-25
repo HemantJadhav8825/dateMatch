@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import StackNavigator from './src/navigation/StackNavigator';
-import { getToken } from './src/utils/index'
+import { getLocalStorage, getToken } from './src/utils/index';
+import { initNotifySocket } from './src/components/CallNotifier';
+import { showIncomingCallUI } from './src/components/showIncomingCallUI';
 
 const AppNavigator = () => {
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,14 @@ const AppNavigator = () => {
         setLoading(false);
       }
     };
-    checkToken();
+    checkToken().then(async () => {
+      const token = await getToken();
+      const userId = await getLocalStorage('userId')
+      initNotifySocket(userId, token, (data: any) => {
+        // This callback runs when "incoming_call" arrives
+        showIncomingCallUI(data);
+      });
+    });
   }, []);
 
   if (loading) {
@@ -30,7 +39,7 @@ const AppNavigator = () => {
   }
 
   return (
-    <StackNavigator initialRouteName={accessToken ? 'Home' : 'VoiceCall'} />
+    <StackNavigator initialRouteName={accessToken ? 'Home' : 'Home'} />
   );
 };
 
