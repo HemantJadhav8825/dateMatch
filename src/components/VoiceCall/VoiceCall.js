@@ -1,17 +1,18 @@
 import React, { useContext } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { ThemeContext } from '../../theme/ThemeContext';
 import { createStyles } from './styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const VoiceCallScreen = ({ navigation }) => {
+const VoiceCallScreen = () => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme);
+  const navigation = useNavigation(); // <-- HERE
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* Caller Info */}
       <View style={styles.callerSection}>
         <Image
           source={{ uri: 'https://via.placeholder.com/150' }}
@@ -21,7 +22,6 @@ const VoiceCallScreen = ({ navigation }) => {
         <Text style={styles.callStatus}>Voice Call in Progress</Text>
       </View>
 
-      {/* Call Controls */}
       <View style={styles.controls}>
         <TouchableOpacity style={styles.controlButton}>
           <Icon name="mic-off" size={28} color={theme.colors.text} />
