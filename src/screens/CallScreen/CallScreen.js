@@ -7,8 +7,6 @@ import VoiceCallScreen from '../../components/VoiceCall/VoiceCall';
 
 export default function CallScreen() {
   return (
-    <View>
       <VoiceCallScreen />
-    </View>
   );
 }
