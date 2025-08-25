@@ -30,7 +30,7 @@ const AppNavigator = () => {
   }
 
   return (
-    <StackNavigator initialRouteName={accessToken ? 'Home' : 'Call'} />
+    <StackNavigator initialRouteName={accessToken ? 'Home' : 'VoiceCall'} />
   );
 };
 

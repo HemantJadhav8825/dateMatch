@@ -35,7 +35,7 @@ const HomeScreen = ({navigation}) => {
       <View style={styles.languageBadge}>
         <Text style={styles.languageText}>{item.language}</Text>
       </View>
-      <TouchableOpacity onPress={() =>  navigation?.navigate('Call', {})} style={styles.joinButton}>
+      <TouchableOpacity onPress={() =>  navigation?.navigate('VoiceCall', {})} style={styles.joinButton}>
         <Text style={styles.joinButtonText}>
           {item.callType === 'video' ? '📹 Join' : '📞 Join'}
         </Text>
