@@ -2316,6 +2316,8 @@ PODS:
     - React-perflogger (= 0.81.0)
     - React-utils (= 0.81.0)
     - SocketRocket
+  - ReactNativeIncallManager (4.2.1):
+    - React-Core
   - RNCAsyncStorage (2.2.0):
     - boost
     - DoubleConversion
@@ -2481,6 +2483,7 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - ReactNativeIncallManager (from `../node_modules/react-native-incall-manager`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - RNScreens (from `../node_modules/react-native-screens`)
   - SocketRocket (~> 0.7.1)
@@ -2639,6 +2642,8 @@ EXTERNAL SOURCES:
     :path: build/generated/ios
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  ReactNativeIncallManager:
+    :path: "../node_modules/react-native-incall-manager"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNScreens:
@@ -2721,6 +2726,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: c91900fa724baee992f01c05eeb4c9e01a807f78
   ReactCodegen: 8f2a63b11f0625a7b36d4c8c588d7c89a3086cda
   ReactCommon: 5ee89f5eec706805c432ed5b598adcd4e5aaa088
+  ReactNativeIncallManager: dccd3e7499caa3bb73d3acfedf4fb0360f1a87d5
   RNCAsyncStorage: e3ac284ded8c3883e6099c652cbd0527bb4416c8
   RNScreens: 0c7a998471db2c0184c91d479670ece74f9f4060
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
