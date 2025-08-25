@@ -1,47 +1,99 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  PermissionsAndroid,
+  Platform,
+  TouchableOpacity,
+  Alert
+} from 'react-native';
 import {
   RTCPeerConnection,
   RTCView,
-  mediaDevices
+  mediaDevices,
+  MediaStream
 } from 'react-native-webrtc';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Ensure installed: react-native-vector-icons
 
 const configuration = {
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'turn:your-turn-server-url', username: 'user', credential: 'pass' }
+    { urls: 'stun:stun.l.google.com:19302' }
   ]
 };
 
 export default function CallScreen() {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
-  const pc = useRef(new RTCPeerConnection(configuration)).current;
+  const [isMuted, setIsMuted] = useState(false);
+  const pc = useRef(null);
 
   useEffect(() => {
     const init = async () => {
-      const stream = await mediaDevices.getUserMedia({ audio: true, video: true });
-      setLocalStream(stream);
-
-      stream.getTracks().forEach(track => pc.addTrack(track, stream));
-
-      pc.ontrack = (event) => {
-        const [stream] = event.streams;
-        if (stream) {
-          setRemoteStream(stream);
+      try {
+        if (Platform.OS === 'android') {
+          const granted = await PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.CAMERA,
+            PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+          ]);
+          if (
+            granted['android.permission.CAMERA'] !== PermissionsAndroid.RESULTS.GRANTED ||
+            granted['android.permission.RECORD_AUDIO'] !== PermissionsAndroid.RESULTS.GRANTED
+          ) {
+            Alert.alert('Permissions not granted');
+            return;
+          }
         }
-      };
 
-      // TODO: signaling logic here (send offer/answer to your call-service)
+        pc.current = new RTCPeerConnection(configuration);
+
+        const stream = await mediaDevices.getUserMedia({ audio: true, video: true });
+        setLocalStream(stream);
+
+        stream.getTracks().forEach(track => pc.current.addTrack(track, stream));
+
+        pc.current.ontrack = (event) => {
+          if (event.streams && event.streams[0]) {
+            setRemoteStream(event.streams[0]);
+          } else {
+            const inboundStream = new MediaStream();
+            inboundStream.addTrack(event.track);
+            setRemoteStream(inboundStream);
+          }
+        };
+
+        // TODO: Add signaling logic here (offer/answer/ICE)
+      } catch (error) {
+        console.error('Error initializing call:', error);
+      }
     };
 
     init();
 
     return () => {
-      pc.close();
+      if (pc.current) {
+        pc.current.close();
+      }
       localStream?.getTracks().forEach(track => track.stop());
     };
   }, []);
+
+  const toggleMute = () => {
+    if (!localStream) return;
+    const audioTrack = localStream.getAudioTracks()[0];
+    if (audioTrack) {
+      audioTrack.enabled = !audioTrack.enabled;
+      setIsMuted(!audioTrack.enabled);
+    }
+  };
+
+  const endCall = () => {
+    pc.current?.close();
+    localStream?.getTracks().forEach(track => track.stop());
+    setLocalStream(null);
+    setRemoteStream(null);
+    Alert.alert('Call ended');
+  };
 
   return (
     <View style={styles.container}>
@@ -52,21 +104,33 @@ export default function CallScreen() {
           objectFit="cover"
         />
       ) : (
-        <Text style={styles.waitingText}>Waiting for remote video...</Text>
+        <View style={styles.waitingContainer}>
+          <Text style={styles.waitingText}>Waiting for remote video...</Text>
+        </View>
       )}
 
       {localStream && (
-        <RTCView
-          streamURL={localStream.toURL()}
-          style={styles.localVideo}
-          objectFit="cover"
-        />
+        <View style={styles.localPreview}>
+          <RTCView
+            streamURL={localStream.toURL()}
+            style={styles.localVideo}
+            objectFit="cover"
+          />
+        </View>
       )}
 
       <View style={styles.controls}>
-        <Button title="Start" onPress={() => {/* Start call */}} />
-        <Button title="Mute" onPress={() => {/* Toggle mute */}} />
-        <Button title="End" color="red" onPress={() => {/* End call */}} />
+        <TouchableOpacity style={styles.controlButton} onPress={toggleMute}>
+          <Icon name={isMuted ? "microphone-off" : "microphone"} size={28} color="white" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.controlButton, styles.endButton]} onPress={endCall}>
+          <Icon name="phone-hangup" size={28} color="white" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.controlButton} onPress={() => { /* Switch camera */ }}>
+          <Icon name="camera-switch" size={28} color="white" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -75,31 +139,55 @@ export default function CallScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'black'
   },
   remoteVideo: {
     flex: 1,
     width: '100%',
   },
-  localVideo: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    width: 120,
-    height: 160,
-    backgroundColor: 'black',
+  waitingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   waitingText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 18,
+    opacity: 0.7,
+  },
+  localPreview: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    width: 120,
+    height: 160,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'white'
+  },
+  localVideo: {
+    width: '100%',
+    height: '100%',
   },
   controls: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    position: 'absolute',
+    bottom: 40,
     width: '100%',
-    padding: 20,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    paddingVertical: 15,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20
   },
+  controlButton: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: 16,
+    borderRadius: 50,
+  },
+  endButton: {
+    backgroundColor: 'red',
+  }
 });
