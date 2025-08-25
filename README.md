@@ -28,6 +28,7 @@ npx react-native run-ios
 
 #release apk
 cd android
+./gradlew clean
 ./gradlew assembleRelease
 
 android/app/build/outputs/apk/release/app-release.apk

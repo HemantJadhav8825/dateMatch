@@ -71,5 +71,9 @@
 	<string>We need your microphone to enable calls.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We need your camera to enable video calls.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera for video calls</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to your microphone for calls</string>
 </dict>
 </plist>
