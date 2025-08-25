@@ -24,3 +24,10 @@ rm -rf ios/Pods ios/Podfile.lock
 npm install
 cd ios && pod install && cd ..
 npx react-native run-ios
+
+
+#release apk
+cd android
+./gradlew assembleRelease
+
+android/app/build/outputs/apk/release/app-release.apk
