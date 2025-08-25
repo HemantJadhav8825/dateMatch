@@ -1,11 +1,9 @@
 import axios from 'axios';
 import { getToken } from '../utils';
-
-// const baseURL = 'http://localhost:4000';
-const baseURL = 'https://gateway-gklf.onrender.com';
+import { baseURL } from '../env/allEnv';
 
 const axiosClient = axios.create({
-  baseURL,
+  baseURL: baseURL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

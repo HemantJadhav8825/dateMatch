@@ -1,9 +1,10 @@
 import io from "socket.io-client";
+import { socketURL } from "../env/allEnv";
 
 let notifySocket;
 
 export function initNotifySocket(userId, token, onIncomingCall) {
-  notifySocket = io("http://<SERVER_IP>:5004/notify", {
+  notifySocket = io(socketURL + "/notify", {
     auth: { token },
   });
 

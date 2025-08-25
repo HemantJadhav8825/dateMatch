@@ -13,6 +13,7 @@ import {
 } from "react-native-webrtc";
 import io from "socket.io-client";
 import { useNavigation } from "@react-navigation/native";
+import { socketURL } from "../../env/allEnv";
 
 const VoiceCallScreen = ({ route }) => {
   const { theme } = useContext(ThemeContext);
@@ -56,7 +57,7 @@ const VoiceCallScreen = ({ route }) => {
     });
 
     // 3. Connect signaling
-    sigSocket.current = io("http://<SERVER_IP>:5004/signaling", {
+    sigSocket.current = io(socketURL + "/signaling", {
       auth: { token },
     });
 
