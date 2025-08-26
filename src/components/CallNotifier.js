@@ -1,14 +1,64 @@
+// CallNotifier.js
 import io from "socket.io-client";
 import { socketURL } from "../env/allEnv";
 
-let notifySocket = null; // Singleton instance
+let notifySocket = null;
+let isManuallyDisconnected = false;
 
-export function initNotifySocket(userId, token, onIncomingCall) {
-  // If already initialized, just return it
-  if (notifySocket) return notifySocket;
+const RECONNECT_INTERVAL = 5000; // 5 seconds
+let reconnectTimer = null;
 
+function setupListeners(onIncomingCall, onChatMessage) {
+  // Call events
+  notifySocket.on("incoming_call", (data) => {
+    console.log("Incoming call:", data);
+    if (onIncomingCall) onIncomingCall(data);
+  });
+
+  notifySocket.on("call_accepted", (data) => console.log("Call accepted:", data));
+  notifySocket.on("call_rejected", (data) => console.log("Call rejected:", data));
+
+  // Chat events (example)
+  if (onChatMessage) {
+    notifySocket.on("chat_message", (msg) => {
+      console.log("New chat message:", msg);
+      onChatMessage(msg);
+    });
+  }
+
+  // Handle disconnection
+  notifySocket.on("disconnect", (reason) => {
+    console.warn("Socket disconnected:", reason);
+    if (!isManuallyDisconnected) {
+      scheduleReconnect();
+    }
+  });
+
+  notifySocket.on("connect_error", (error) => {
+    console.error("Socket connection error:", error.message);
+    scheduleReconnect();
+  });
+}
+
+function scheduleReconnect() {
+  if (reconnectTimer) return; // already scheduled
+  console.log(`Attempting to reconnect in ${RECONNECT_INTERVAL / 1000}s...`);
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    if (!isManuallyDisconnected && notifySocket) {
+      notifySocket.connect();
+    }
+  }, RECONNECT_INTERVAL);
+}
+
+export function initNotifySocket(userId, token, onIncomingCall, onChatMessage) {
+  if (notifySocket) return notifySocket; // Reuse
+
+  isManuallyDisconnected = false;
   notifySocket = io(socketURL + "/notify", {
     auth: { token },
+    reconnectionAttempts: 5, // built-in retry
+    reconnectionDelay: 3000,
   });
 
   notifySocket.on("connect", () => {
@@ -16,43 +66,32 @@ export function initNotifySocket(userId, token, onIncomingCall) {
     console.log("Notify socket connected");
   });
 
-  // Handle incoming calls
-  notifySocket.on("incoming_call", (data) => {
-    console.log("Incoming call:", data);
-    if (onIncomingCall) onIncomingCall(data);
-  });
-
-  // Optional: listen to call accepted/rejected
-  notifySocket.on("call_accepted", (data) => console.log("Call accepted:", data));
-  notifySocket.on("call_rejected", (data) => console.log("Call rejected:", data));
+  setupListeners(onIncomingCall, onChatMessage);
 
   return notifySocket;
 }
 
-// Access the same socket elsewhere
 export function getNotifySocket() {
   return notifySocket;
 }
 
-// Emit events
 export function acceptCall(sessionId) {
-  if (!notifySocket) {
-    console.warn("Socket not initialized");
-    return;
-  }
+  if (!notifySocket) return console.warn("Socket not initialized");
   notifySocket.emit("call:accept", { sessionId });
 }
 
 export function rejectCall(sessionId) {
-  if (!notifySocket) {
-    console.warn("Socket not initialized");
-    return;
-  }
+  if (!notifySocket) return console.warn("Socket not initialized");
   notifySocket.emit("call:reject", { sessionId });
 }
 
-// Optional: Disconnect (e.g., on logout)
+export function sendChatMessage(toUserId, message) {
+  if (!notifySocket) return console.warn("Socket not initialized");
+  notifySocket.emit("chat_message", { to: toUserId, message });
+}
+
 export function disconnectNotifySocket() {
+  isManuallyDisconnected = true;
   if (notifySocket) {
     notifySocket.disconnect();
     notifySocket = null;

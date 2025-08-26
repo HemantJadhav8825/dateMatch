@@ -2,17 +2,17 @@ import React, { useEffect, useState, useRef } from 'react';
 import { ActivityIndicator, View, Alert, AppState, AppStateStatus, ToastAndroid, Platform } from 'react-native';
 import StackNavigator from './src/navigation/StackNavigator';
 import { getLocalStorage, getToken } from './src/utils';
-import { initNotifySocket } from './src/components/CallNotifier';
+import { initNotifySocket, disconnectNotifySocket } from './src/components/CallNotifier';
 import { showIncomingCallUI } from './src/components/ShowIncomingCallUI';
 
 const AppNavigator = () => {
   const [loading, setLoading] = useState(true);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const appState = useRef<AppStateStatus>(AppState.currentState);
+  const [accessToken, setAccessToken] = useState<any>(null);
+  const appState = useRef(AppState.currentState);
   const socketInitialized = useRef(false);
-  const userIdRef = useRef<string | null>(null);
+  const userIdRef = useRef<any>(null);
 
-  const showReconnectionError = (message: string) => {
+  const showReconnectionError = (message: any) => {
     if (Platform.OS === 'android') {
       ToastAndroid.show(message, ToastAndroid.LONG);
     } else {
@@ -20,7 +20,7 @@ const AppNavigator = () => {
     }
   };
 
-  const connectSocket = async (token: string) => {
+  const connectSocket = async (token: any) => {
     if (socketInitialized.current || !token) return;
     try {
       const userId = await getLocalStorage('userId');
@@ -30,15 +30,22 @@ const AppNavigator = () => {
       }
       userIdRef.current = userId;
 
-      initNotifySocket(userId, token, (data: any) => {
-        showIncomingCallUI(data);
-      });
+      initNotifySocket(
+        userId,
+        token,
+        (callData: any) => {
+          showIncomingCallUI(callData); // Handle incoming call
+        },
+        (chatMessage: any) => {
+          console.log('New chat message:', chatMessage); // Handle chat here
+        }
+      );
 
       socketInitialized.current = true;
       console.log('Socket connected successfully');
     } catch (error) {
       console.error('Socket connection error:', error);
-      showReconnectionError('Unable to reconnect to server. Calls may not work.');
+      showReconnectionError('Unable to reconnect to server. Calls and chat may not work.');
     }
   };
 
@@ -72,12 +79,11 @@ const AppNavigator = () => {
 
   // Handle AppState for reconnection
   useEffect(() => {
-    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+    const handleAppStateChange = async (nextAppState: any) => {
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        // Reconnect if needed when app comes to foreground
         if (accessToken && userIdRef.current) {
           console.log('App came to foreground. Reconnecting socket...');
           socketInitialized.current = false; // Force reconnection
@@ -97,6 +103,13 @@ const AppNavigator = () => {
       subscription.remove();
     };
   }, [accessToken]);
+
+  // Optional: Disconnect on unmount (or on logout)
+  useEffect(() => {
+    return () => {
+      disconnectNotifySocket();
+    };
+  }, []);
 
   if (loading) {
     return (
