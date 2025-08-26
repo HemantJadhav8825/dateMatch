@@ -1,6 +1,5 @@
-// CallNotifier.js
 import io from "socket.io-client";
-import { socketURL } from "../env/allEnv";
+import { socketURL, apiBaseURL } from "../env/allEnv"; // apiBaseURL points to your REST API base (e.g., http://<SERVER_IP>:5004)
 import { navigate } from "../components/RootNavigation"; // Adjust path as needed
 
 let notifySocket = null;
@@ -10,7 +9,6 @@ const RECONNECT_INTERVAL = 5000; // 5 seconds
 let reconnectTimer = null;
 
 function setupListeners(onIncomingCall, onChatMessage) {
-  // Call events
   notifySocket.on("incoming_call", (data) => {
     console.log("Incoming call:", data);
     if (onIncomingCall) onIncomingCall(data);
@@ -19,7 +17,6 @@ function setupListeners(onIncomingCall, onChatMessage) {
   notifySocket.on("call_accepted", (data) => console.log("Call accepted:", data));
   notifySocket.on("call_rejected", (data) => console.log("Call rejected:", data));
 
-  // Chat events (example)
   if (onChatMessage) {
     notifySocket.on("chat_message", (msg) => {
       console.log("New chat message:", msg);
@@ -27,7 +24,6 @@ function setupListeners(onIncomingCall, onChatMessage) {
     });
   }
 
-  // Handle disconnection
   notifySocket.on("disconnect", (reason) => {
     console.warn("Socket disconnected:", reason);
     if (!isManuallyDisconnected) {
@@ -53,12 +49,12 @@ function scheduleReconnect() {
 }
 
 export function initNotifySocket(userId, token, onIncomingCall, onChatMessage) {
-  if (notifySocket) return notifySocket; // Reuse
+  if (notifySocket) return notifySocket; // Reuse existing
 
   isManuallyDisconnected = false;
   notifySocket = io(socketURL + "/notify", {
     auth: { token },
-    reconnectionAttempts: 5, // built-in retry
+    reconnectionAttempts: 5,
     reconnectionDelay: 3000,
   });
 
@@ -76,17 +72,44 @@ export function getNotifySocket() {
   return notifySocket;
 }
 
-export async function startCall(targetUserId, token) {
-  // Request backend to create call session
-  const session = await createCallSession(targetUserId); // backend returns { sessionId, room }
+// NEW: create call session (HTTP API)
+async function createCallSession(calleeId, token) {
+  try {
+    const res = await fetch(`${apiBaseURL}/call-sessions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // JWT
+      },
+      body: JSON.stringify({ calleeId }),
+    });
 
-  navigate("VoiceCall", {
-    token,
-    room: session.room,
-    isCaller: true,
-  });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Failed to create call session: ${err}`);
+    }
+
+    const data = await res.json(); // expected: { sessionId, room }
+    return data;
+  } catch (error) {
+    console.error("Error creating call session:", error);
+    throw error;
+  }
 }
 
+export async function startCall(targetUserId, token) {
+  try {
+    const session = await createCallSession(targetUserId, token);
+
+    navigate("VoiceCall", {
+      token,
+      room: session.room,
+      isCaller: true,
+    });
+  } catch (error) {
+    console.error("Failed to start call:", error.message);
+  }
+}
 
 export function acceptCall(sessionId) {
   if (!notifySocket) return console.warn("Socket not initialized");
