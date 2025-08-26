@@ -1,6 +1,7 @@
 // CallNotifier.js
 import io from "socket.io-client";
 import { socketURL } from "../env/allEnv";
+import { navigate } from "../components/RootNavigation"; // Adjust path as needed
 
 let notifySocket = null;
 let isManuallyDisconnected = false;
@@ -74,6 +75,18 @@ export function initNotifySocket(userId, token, onIncomingCall, onChatMessage) {
 export function getNotifySocket() {
   return notifySocket;
 }
+
+export async function startCall(targetUserId, token) {
+  // Request backend to create call session
+  const session = await createCallSession(targetUserId); // backend returns { sessionId, room }
+
+  navigate("VoiceCall", {
+    token,
+    room: session.room,
+    isCaller: true,
+  });
+}
+
 
 export function acceptCall(sessionId) {
   if (!notifySocket) return console.warn("Socket not initialized");

@@ -1,27 +1,26 @@
+import { Alert } from "react-native";
 import { acceptCall, rejectCall } from "./CallNotifier";
-
-const { useNavigation } = require("@react-navigation/native");
-const { Alert } = require("react-native");
+import { navigate } from "../components/RootNavigation"; // path may differ
 
 const showIncomingCallUI = ({ sessionId, from, room, token }) => {
-    const navigation = useNavigation();
-    Alert.alert(
-        "Incoming Call",
-        `Call from ${from.name}`,
-        [
-            { text: "Reject", onPress: () => rejectCall(sessionId), style: "cancel" },
-            {
-                text: "Accept", onPress: () => {
-                    acceptCall(sessionId);
-                    navigation.navigate("VoiceCallScreen", {
-                        token,
-                        room,
-                        isCaller: false,
-                    });
-                }
-            }
-        ]
-    );
+  Alert.alert(
+    "Incoming Call",
+    `Call from ${from?.name || "Unknown"}`,
+    [
+      { text: "Reject", onPress: () => rejectCall(sessionId), style: "cancel" },
+      {
+        text: "Accept",
+        onPress: () => {
+          acceptCall(sessionId);
+          navigate("VoiceCallScreen", {
+            token,
+            room,
+            isCaller: false,
+          });
+        }
+      }
+    ]
+  );
 };
 
 export { showIncomingCallUI };

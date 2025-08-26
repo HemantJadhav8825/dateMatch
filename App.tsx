@@ -4,6 +4,8 @@ import StackNavigator from './src/navigation/StackNavigator';
 import { getLocalStorage, getToken } from './src/utils';
 import { initNotifySocket, disconnectNotifySocket } from './src/components/CallNotifier';
 import { showIncomingCallUI } from './src/components/ShowIncomingCallUI';
+import { NavigationContainer } from '@react-navigation/native';
+import { navigationRef } from './src/components/RootNavigation';
 
 const AppNavigator = () => {
   const [loading, setLoading] = useState(true);
@@ -120,7 +122,9 @@ const AppNavigator = () => {
   }
 
   return (
-    <StackNavigator initialRouteName={accessToken ? 'Home' : 'Login'} />
+    <NavigationContainer ref={navigationRef}>
+      <StackNavigator initialRouteName={accessToken ? 'Home' : 'Login'} />
+    </NavigationContainer>
   );
 };
 
