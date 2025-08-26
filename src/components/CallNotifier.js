@@ -2,6 +2,7 @@ import io from "socket.io-client";
 import { socketURL, baseURL } from "../env/allEnv"; // baseURL points to your REST API base (e.g., http://<SERVER_IP>:5004)
 import { navigate } from "../components/RootNavigation"; // Adjust path as needed
 import axiosClient from "../api/axiosClient";
+import { getToken } from "../utils";
 
 let notifySocket = null;
 let isManuallyDisconnected = false;
@@ -74,7 +75,7 @@ export function getNotifySocket() {
 }
 
 // NEW: create call session (HTTP API)
-async function createCallSession(calleeId, token) {
+async function createCallSession(calleeId) {
   try {
     const { data } = await axiosClient.post('/call/call-sessions', { calleeId });
 
@@ -85,9 +86,10 @@ async function createCallSession(calleeId, token) {
   }
 }
 
-export async function startCall(targetUserId, token) {
+export async function startCall(targetUserId) {
   try {
-    const session = await createCallSession(targetUserId, token);
+    const token = await getToken();
+    const session = await createCallSession(targetUserId);
 
     navigate("VoiceCall", {
       token,

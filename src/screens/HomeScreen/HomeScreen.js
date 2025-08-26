@@ -10,6 +10,7 @@ import createStyles from './styles'; // <-- We'll change this to a function
 
 import { avatars, roomTypes } from "../../constants/homeScreenConstants";
 import { ThemeContext } from '../../theme/ThemeContext';
+import { startCall } from '../../components/CallNotifier';
 
 const HomeScreen = ({navigation}) => {
   const { theme } = useContext(ThemeContext);
@@ -35,7 +36,7 @@ const HomeScreen = ({navigation}) => {
       <View style={styles.languageBadge}>
         <Text style={styles.languageText}>{item.language}</Text>
       </View>
-      <TouchableOpacity onPress={() =>  navigation?.navigate('VoiceCall', {})} style={styles.joinButton}>
+      <TouchableOpacity onPress={() =>  startCall('user123')} style={styles.joinButton}>
         <Text style={styles.joinButtonText}>
           {item.callType === 'video' ? '📹 Join' : '📞 Join'}
         </Text>
