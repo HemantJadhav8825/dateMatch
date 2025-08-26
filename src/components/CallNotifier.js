@@ -1,6 +1,7 @@
 import io from "socket.io-client";
-import { socketURL, apiBaseURL } from "../env/allEnv"; // apiBaseURL points to your REST API base (e.g., http://<SERVER_IP>:5004)
+import { socketURL, baseURL } from "../env/allEnv"; // baseURL points to your REST API base (e.g., http://<SERVER_IP>:5004)
 import { navigate } from "../components/RootNavigation"; // Adjust path as needed
+import axiosClient from "../api/axiosClient";
 
 let notifySocket = null;
 let isManuallyDisconnected = false;
@@ -75,21 +76,8 @@ export function getNotifySocket() {
 // NEW: create call session (HTTP API)
 async function createCallSession(calleeId, token) {
   try {
-    const res = await fetch(`${apiBaseURL}/call-sessions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // JWT
-      },
-      body: JSON.stringify({ calleeId }),
-    });
+    const { data } = await axiosClient.post('/call/call-sessions', { calleeId });
 
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Failed to create call session: ${err}`);
-    }
-
-    const data = await res.json(); // expected: { sessionId, room }
     return data;
   } catch (error) {
     console.error("Error creating call session:", error);
