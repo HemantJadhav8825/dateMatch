@@ -3,25 +3,26 @@ import { ActivityIndicator, View } from 'react-native';
 import StackNavigator from './src/navigation/StackNavigator';
 import { getLocalStorage, getToken } from './src/utils/index';
 import { initNotifySocket } from './src/components/CallNotifier';
-import { showIncomingCallUI } from './src/components/showIncomingCallUI';
+import { showIncomingCallUI } from './src/components/ShowIncomingCallUI';
 
 const AppNavigator = () => {
   const [loading, setLoading] = useState(false);
   const [accessToken, setAccessToken] = useState<any>(null);
 
-  useEffect(() => {
-    const checkToken = async () => {
-      try {
-        const token = await getToken();
-        setAccessToken(token);
-      } catch (e) {
-        console.error('Failed to load token');
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkToken().then(async () => {
+  const checkToken = async () => {
+    try {
       const token = await getToken();
+      setAccessToken(token);
+      return token;
+    } catch (e) {
+      console.error('Failed to load token');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    checkToken().then(async (token) => {
       const userId = await getLocalStorage('userId')
       initNotifySocket(userId, token, (data: any) => {
         // This callback runs when "incoming_call" arrives
