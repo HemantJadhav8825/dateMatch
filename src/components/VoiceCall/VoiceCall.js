@@ -11,21 +11,20 @@ import {
   RTCIceCandidate,
   RTCSessionDescription,
 } from "react-native-webrtc";
-import io from "socket.io-client";
 import { useNavigation } from "@react-navigation/native";
-import { socketURL } from "../../env/allEnv";
+import { getNotifySocket } from "../CallNotifier";
 
 const VoiceCallScreen = ({ route }) => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme);
   const navigation = useNavigation();
 
-  const { token, room, isCaller } = route.params; // pass from previous screen
+  const { token, room, isCaller } = route.params;
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
 
   const pc = useRef(null);
-  const sigSocket = useRef(null);
+  const notifySocket = getNotifySocket(); // use existing socket
   const localStream = useRef(null);
 
   useEffect(() => {
@@ -40,14 +39,14 @@ const VoiceCallScreen = ({ route }) => {
     // send ICE candidates
     pc.current.onicecandidate = (event) => {
       if (event.candidate) {
-        sigSocket.current.emit("ice", { room, candidate: event.candidate });
+        notifySocket.emit("call:ice", { room, candidate: event.candidate });
       }
     };
 
     // handle remote stream
     pc.current.ontrack = (event) => {
       console.log("Remote stream received");
-      // You can attach it to <RTCView /> if you want
+      // attach to RTCView if needed
     };
 
     // 2. Get local audio
@@ -56,29 +55,25 @@ const VoiceCallScreen = ({ route }) => {
       stream.getTracks().forEach((t) => pc.current.addTrack(t, stream));
     });
 
-    // 3. Connect signaling
-    sigSocket.current = io(socketURL + "/signaling", {
-      auth: { token },
-    });
-
-    sigSocket.current.on("connect", () => {
-      sigSocket.current.emit("join", { room });
-    });
+    // 3. Join signaling room
+    notifySocket.emit("call:join", { room });
 
     // handle offer/answer/ice
-    sigSocket.current.on("offer", async ({ sdp }) => {
+    notifySocket.on("call:offer", async ({ sdp }) => {
       await pc.current.setRemoteDescription(new RTCSessionDescription(sdp));
       const answer = await pc.current.createAnswer();
       await pc.current.setLocalDescription(answer);
-      sigSocket.current.emit("answer", { room, sdp: answer });
+      notifySocket.emit("call:answer", { room, sdp: answer });
     });
 
-    sigSocket.current.on("answer", async ({ sdp }) => {
+    notifySocket.on("call:answer", async ({ sdp }) => {
       await pc.current.setRemoteDescription(new RTCSessionDescription(sdp));
     });
 
-    sigSocket.current.on("ice", async ({ candidate }) => {
-      await pc.current.addIceCandidate(new RTCIceCandidate(candidate));
+    notifySocket.on("call:ice", async ({ candidate }) => {
+      if (candidate) {
+        await pc.current.addIceCandidate(new RTCIceCandidate(candidate));
+      }
     });
 
     // 4. Caller initiates offer
@@ -86,23 +81,21 @@ const VoiceCallScreen = ({ route }) => {
       (async () => {
         const offer = await pc.current.createOffer();
         await pc.current.setLocalDescription(offer);
-        sigSocket.current.emit("offer", { room, sdp: offer });
+        notifySocket.emit("call:offer", { room, sdp: offer });
       })();
     }
 
     return () => {
       InCallManager.stop();
-      sigSocket.current?.disconnect();
       pc.current?.close();
+      notifySocket.emit("call:end", { room, reason: "hangup" });
     };
   }, []);
 
   // === Controls ===
   const toggleMute = () => {
     setIsMuted((prev) => !prev);
-    localStream.current
-      ?.getAudioTracks()
-      .forEach((t) => (t.enabled = isMuted));
+    localStream.current?.getAudioTracks().forEach((t) => (t.enabled = isMuted));
   };
 
   const toggleSpeaker = () => {
@@ -112,9 +105,8 @@ const VoiceCallScreen = ({ route }) => {
 
   const endCall = () => {
     InCallManager.stop();
-    sigSocket.current.emit("end", { room, reason: "hangup" });
+    notifySocket.emit("call:end", { room, reason: "hangup" });
     pc.current?.close();
-    sigSocket.current?.disconnect();
     navigation.navigate("Home");
   };
 
