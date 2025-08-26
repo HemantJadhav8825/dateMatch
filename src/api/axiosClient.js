@@ -17,7 +17,7 @@ axiosClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('📤 Request:', config.method.toUpperCase(), config.url, config.data || config.params);
+    console.log('📤 Request:', config.method.toUpperCase(),baseURL + config.url, config.data || config.params);
     return config;
   },
   (error) => Promise.reject(error)

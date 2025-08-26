@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { ThemeContext } from '../../theme/ThemeContext';
 import getStyles from './styles';
+import { removeToken } from '../../utils';
 
 const SettingsScreen = ({ navigation }) => {
   const { isDark, theme, toggleTheme } = useContext(ThemeContext);
@@ -16,8 +17,10 @@ const SettingsScreen = ({ navigation }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const onLogout = () => {
-    Alert.alert('Logged out');
-    navigation.navigate('Login');
+    removeToken().then(() => {
+      Alert.alert('Logged out');
+      navigation.navigate('Login');
+    });
   };
 
   const toggleNotifications = () => setNotificationsEnabled((prev) => !prev);
