@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   useColorScheme,
   Platform,
@@ -14,6 +13,7 @@ import axiosClient from '../../api/axiosClient';
 import createStyles from './styles';
 import { setLocalStorage } from '../../utils';
 import { VERIFY_OTP_FOR_LOGIN, SEND_OTP_FOR_LOGIN } from '../../api/endpoints';
+import Toast from 'react-native-toast-message';
 
 const OtpScreen = ({ navigation = {}, route = {} }) => {
   const { phone = '9503760623', requestId: initialRequestId } = route.params || {};
@@ -25,6 +25,7 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
   const [timer, setTimer] = useState(30);
   const [requestId, setRequestId] = useState(initialRequestId);
 
+  // Countdown timer for resend
   useEffect(() => {
     let countdown;
     if (timer > 0) {
@@ -49,31 +50,37 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
         await setLocalStorage('userId', data?.user?.id);
         navigation?.replace('Home');
       } else {
-        Alert.alert('Invalid OTP', 'OTP verification failed');
+        Toast.show({ type: 'error', text1: 'Invalid OTP', text2: 'OTP verification failed' });
       }
     } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: error?.response?.data?.error || 'Something went wrong. Please try again.',
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const resendOtp = async () => {
-    if (timer > 0) return;
+    if (timer > 0 || loading) return; // Block rapid resends
     setLoading(true);
     try {
       const { data } = await axiosClient.post(SEND_OTP_FOR_LOGIN, { phone });
       if (data?.requestId) {
         setRequestId(data.requestId);
         setTimer(30);
-        Alert.alert('OTP Sent', `New OTP sent to ${phone}`);
+        Toast.show({ type: 'success', text1: 'OTP Sent', text2: `New OTP sent to ${phone}` });
       } else {
-        Alert.alert('Error', 'Failed to send new OTP.');
+        Toast.show({ type: 'error', text1: 'Error', text2: 'Failed to send new OTP.' });
       }
     } catch (error) {
-      console.error('Error:', error?.response || error);
-      Alert.alert('Error', error?.response?.data?.error || 'Failed to send OTP. Please try again.');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: error?.response?.data?.error || 'Failed to send OTP. Please try again.',
+      });
     } finally {
       setLoading(false);
     }
@@ -94,7 +101,7 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
         codeInputFieldStyle={styles.otpInput}
         codeInputHighlightStyle={styles.otpInputActive}
         onCodeFilled={handleSubmit}
-        keyboardType={Platform.OS === 'ios' ? 'numeric' : 'number-pad'}
+        keyboardType="number-pad"
         textContentType="oneTimeCode"
         autoComplete="sms-otp"
         importantForAutofill="yes"
