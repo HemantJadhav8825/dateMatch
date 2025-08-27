@@ -1,68 +1,22 @@
 import React, { useContext } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  FlatList
-} from 'react-native';
-import createStyles from './styles'; // <-- We'll change this to a function
-
+import { View, Text, FlatList } from 'react-native';
+import createStyles from './styles';
 import { avatars, roomTypes } from "../../constants/homeScreenConstants";
 import { ThemeContext } from '../../theme/ThemeContext';
-import { startCall } from '../../components/CallNotifier';
 
-const HomeScreen = ({navigation}) => {
+import RenderAvatar from './homeComponents/RenderAvatar';
+import RenderRoom from './homeComponents/RenderRoom';
+
+const HomeScreen = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
-  const styles = createStyles(theme); // <-- pass theme to styles
-
-  const renderAvatar = ({ item }) => (
-    <View style={styles.avatarCard}>
-      <View style={styles.avatarImageWrapper}>
-        <Image source={item.img} style={styles.avatarImage} />
-        {item.status === 'online' && <View style={styles.onlineDot} />}
-        {item.special === 'star' && (
-          <View style={styles.starBadge}>
-            <Text style={styles.badgeText}>⭐</Text>
-          </View>
-        )}
-        {item.special === 'super' && (
-          <View style={styles.superBadge}>
-            <Text style={styles.badgeText}>Super</Text>
-          </View>
-        )}
-      </View>
-      <Text style={styles.avatarName}>{item.name}</Text>
-      <View style={styles.languageBadge}>
-        <Text style={styles.languageText}>{item.language}</Text>
-      </View>
-      <TouchableOpacity onPress={() =>  startCall('user123')} style={styles.joinButton}>
-        <Text style={styles.joinButtonText}>
-          {item.callType === 'video' ? '📹 Join' : '📞 Join'}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  const renderRoom = ({ item }) => (
-    <TouchableOpacity style={styles.roomCard}>
-      {item.badge && (
-        <View style={styles.newBadge}>
-          <Text style={styles.newBadgeText}>{item.badge}</Text>
-        </View>
-      )}
-      <Image source={item.img} style={styles.roomImage} resizeMode="contain" />
-      <Text style={styles.roomTitle}>{item.title}</Text>
-      {item.subtitle && <Text style={styles.roomSubtitle}>{item.subtitle}</Text>}
-    </TouchableOpacity>
-  );
+  const styles = createStyles(theme);
 
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Private Training</Text>
       <FlatList
         data={avatars}
-        renderItem={renderAvatar}
+        renderItem={({ item }) => <RenderAvatar item={item} styles={styles} />}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -72,7 +26,7 @@ const HomeScreen = ({navigation}) => {
       <Text style={styles.sectionTitle}>All Room Types</Text>
       <FlatList
         data={roomTypes}
-        renderItem={renderRoom}
+        renderItem={({ item }) => <RenderRoom item={item} styles={styles} />}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -81,7 +35,7 @@ const HomeScreen = ({navigation}) => {
       <Text style={styles.sectionTitle}>Other Room Types</Text>
       <FlatList
         data={roomTypes}
-        renderItem={renderRoom}
+        renderItem={({ item }) => <RenderRoom item={item} styles={styles} />}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
