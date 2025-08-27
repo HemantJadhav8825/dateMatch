@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import createStyles from './styles';
 import { avatars, roomTypes } from "../../constants/homeScreenConstants";
@@ -6,10 +6,25 @@ import { ThemeContext } from '../../theme/ThemeContext';
 
 import RenderAvatar from './homeComponents/RenderAvatar';
 import RenderRoom from './homeComponents/RenderRoom';
+import axiosClient from '../../api/axiosClient';
+import { GET_ALL_USERS } from '../../api/endpoints';
 
 const HomeScreen = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme);
+  const [allUsers, setAllUsers] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await axiosClient.get(GET_ALL_USERS);
+        console.log("All Users Data:", data);
+        setAllUsers(data);
+      } catch (error) {
+        console.error("Error in Home Screen useEffect:GET_ALL_USERS", error);
+      }
+    })();
+  }, []);
 
   return (
     <View style={styles.container}>
