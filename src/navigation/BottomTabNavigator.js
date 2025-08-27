@@ -13,7 +13,7 @@ const BottomTabNavigator = () => {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-          if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
+          if (route.name === 'HomeScreen') iconName = focused ? 'home' : 'home-outline';
           else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
           else if (route.name === 'Settings') iconName = focused ? 'settings' : 'settings-outline';
           return <Icon name={iconName} size={size} color={color} />;
@@ -22,7 +22,7 @@ const BottomTabNavigator = () => {
         tabBarInactiveTintColor: 'gray',
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="HomeScreen" component={HomeScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
