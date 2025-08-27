@@ -37,17 +37,32 @@ export default (theme) =>
       marginBottom: 25,
       textAlign: 'center',
     },
-    input: {
+
+    // For react-native-phone-number-input
+    phoneInputContainer: {
+      width: '100%',
       borderWidth: 1,
       borderColor: theme.colors.border,
       backgroundColor: theme.colors.inputBackground,
       borderRadius: 8,
-      paddingVertical: 12,
-      paddingHorizontal: 15,
-      fontSize: 16,
       marginBottom: 20,
-      color: theme.colors.text,
+      overflow: 'hidden', // ensures no overflow of code area
     },
+    phoneTextContainer: {
+      backgroundColor: theme.colors.inputBackground,
+      borderLeftWidth: 1,
+      borderLeftColor: theme.colors.border,
+      borderRadius: 0, // avoid double rounding with container
+      paddingVertical: 0,
+    },
+
+    errorText: {
+      color: theme.isDark ? '#ff6b6b' : '#d9534f',
+      fontSize: 13,
+      marginBottom: 10,
+      textAlign: 'center',
+    },
+
     button: {
       backgroundColor: theme.colors.primary,
       paddingVertical: 14,
