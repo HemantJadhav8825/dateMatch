@@ -2,7 +2,7 @@ import io from "socket.io-client";
 import { socketURL, baseURL } from "../env/allEnv"; // baseURL points to your REST API base (e.g., http://<SERVER_IP>:5004)
 import { navigate } from "../components/RootNavigation"; // Adjust path as needed
 import axiosClient from "../api/axiosClient";
-import { getToken } from "../utils";
+import { getToken, removeLocalStorage, removeToken } from "../utils";
 
 let notifySocket = null;
 let isManuallyDisconnected = false;
@@ -33,10 +33,34 @@ function setupListeners(onIncomingCall, onChatMessage) {
     }
   });
 
-  notifySocket.on("connect_error", (error) => {
-    console.error("Socket connection error:", error.message);
-    scheduleReconnect();
-  });
+notifySocket.on("connect_error", async (error) => {
+  console.error("Socket connection error:", error?.message);
+
+  // Handle unauthorized from middleware
+  if (error?.message === "unauthorized") {
+    console.warn("Unauthorized socket connection. Logging out...");
+
+    try {
+      await removeToken();               // Clear token
+      await removeLocalStorage('userId'); // Clear userId
+    } catch (e) {
+      console.error("Failed to clear local storage:", e);
+    }
+
+    isManuallyDisconnected = true;
+    if (notifySocket) {
+      notifySocket.disconnect();
+      notifySocket = null;
+    }
+
+    navigate("Login");
+    return; // Don't reconnect if unauthorized
+  }
+
+  scheduleReconnect();
+});
+
+
 }
 
 function scheduleReconnect() {
@@ -123,4 +147,8 @@ export function disconnectNotifySocket() {
     notifySocket = null;
     console.log("Notify socket disconnected");
   }
+}
+
+export function isNotifySocketAlive() {
+  return notifySocket?.connected ?? false;
 }

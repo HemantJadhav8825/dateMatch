@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { ActivityIndicator, View, Alert, AppState, AppStateStatus, ToastAndroid, Platform } from 'react-native';
 import StackNavigator from './src/navigation/StackNavigator';
 import { getLocalStorage, getToken } from './src/utils';
-import { initNotifySocket, disconnectNotifySocket } from './src/components/CallNotifier';
+import { initNotifySocket, disconnectNotifySocket, isNotifySocketAlive } from './src/components/CallNotifier';
 import { showIncomingCallUI } from './src/components/ShowIncomingCallUI';
 
 const AppNavigator = () => {
@@ -110,6 +110,22 @@ const AppNavigator = () => {
       disconnectNotifySocket();
     };
   }, []);
+
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isNotifySocketAlive()) {
+        console.warn('Socket is not live! Attempting reconnection...');
+        // Optionally re-init if needed
+        // initNotifySocket(userId, token, onIncomingCall, onChatMessage);
+      } else {
+        console.log('Socket is healthy');
+      }
+    }, 10000); // every 10s
+
+    return () => clearInterval(interval);
+  }, []);
+
 
   if (loading) {
     return (
