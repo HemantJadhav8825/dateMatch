@@ -22,17 +22,17 @@ export default function createStyles(mode = 'light') {
     },
     otpWrapper: {
       width: '80%',
-      height: 60,
+      alignSelf: 'center',
       marginBottom: 30,
     },
     otpInput: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 10,
       width: 60,
       height: 60,
-      backgroundColor: isDark ? '#222' : '#fff',
-      borderRadius: 10,
-      fontSize: 22,
-      color: isDark ? '#fff' : '#000',
-      textAlign: 'center',
+      justifyContent: 'center',
+      alignItems: 'center',
       ...Platform.select({
         ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3 },
         android: { elevation: 3 },

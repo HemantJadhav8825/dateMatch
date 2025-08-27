@@ -31,7 +31,7 @@ const LoginScreen = ({ navigation }) => {
 
   const styles = createStyles(themeConfig);
 
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('9503760623');
   const [formattedPhone, setFormattedPhone] = useState('+91');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

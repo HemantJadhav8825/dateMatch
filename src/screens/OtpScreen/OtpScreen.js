@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import OTPInputView from '@twotalltotems/react-native-otp-input';
+import { OtpInput } from 'react-native-otp-entry';
 import axiosClient from '../../api/axiosClient';
 import createStyles from './styles';
 import { setLocalStorage } from '../../utils';
@@ -64,7 +64,14 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
   };
 
   const resendOtp = async () => {
-    if (timer > 0 || loading) return; // Block rapid resends
+    if (timer > 0 || loading) {
+      Toast.show({
+        type: 'info',
+        text1: 'Please wait',
+        text2: `You can resend OTP after ${timer}s`,
+      });
+      return;
+    }
     setLoading(true);
     try {
       const { data } = await axiosClient.post(SEND_OTP_FOR_LOGIN, { phone });
@@ -94,17 +101,19 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
       <Text style={styles.title}>Verify Your OTP</Text>
       <Text style={styles.subtitle}>Sent to +91 {phone}</Text>
 
-      <OTPInputView
-        style={styles.otpWrapper}
-        pinCount={4}
-        autoFocusOnLoad={Platform.OS === 'android'}
-        codeInputFieldStyle={styles.otpInput}
-        codeInputHighlightStyle={styles.otpInputActive}
-        onCodeFilled={handleSubmit}
+      <OtpInput
+        numberOfDigits={4}
+        focusColor={scheme === 'dark' ? '#fff' : '#4a00e0'}
+        onTextChange={setOtp}
+        onFilled={(code) => handleSubmit(code)}
+        theme={{
+          containerStyle: styles.otpWrapper,
+          pinCodeContainerStyle: styles.otpInput,
+          focusedPinCodeContainerStyle: styles.otpInputActive,
+          pinCodeTextStyle: { color: scheme === 'dark' ? '#fff' : '#000', fontSize: 22 },
+        }}
+        autoFocus
         keyboardType="number-pad"
-        textContentType="oneTimeCode"
-        autoComplete="sms-otp"
-        importantForAutofill="yes"
       />
 
       <TouchableOpacity
@@ -119,7 +128,7 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={resendOtp} disabled={timer > 0 || loading}>
+      <TouchableOpacity onPress={resendOtp} disabled={loading}>
         <Text style={styles.resendText}>
           {timer > 0 ? `Resend OTP in ${timer}s` : 'Resend OTP'}
         </Text>
