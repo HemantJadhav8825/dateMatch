@@ -2346,7 +2346,35 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNScreens (4.15.0):
+  - RNCClipboard (1.16.3):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - RNScreens (4.15.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2373,10 +2401,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNScreens/common (= 4.15.0)
+    - RNScreens/common (= 4.15.2)
     - SocketRocket
     - Yoga
-  - RNScreens/common (4.15.0):
+  - RNScreens/common (4.15.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2485,6 +2513,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeIncallManager (from `../node_modules/react-native-incall-manager`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
+  - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - RNScreens (from `../node_modules/react-native-screens`)
   - SocketRocket (~> 0.7.1)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -2646,6 +2675,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-incall-manager"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
+  RNCClipboard:
+    :path: "../node_modules/@react-native-clipboard/clipboard"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   Yoga:
@@ -2728,7 +2759,8 @@ SPEC CHECKSUMS:
   ReactCommon: 5ee89f5eec706805c432ed5b598adcd4e5aaa088
   ReactNativeIncallManager: dccd3e7499caa3bb73d3acfedf4fb0360f1a87d5
   RNCAsyncStorage: e3ac284ded8c3883e6099c652cbd0527bb4416c8
-  RNScreens: 0c7a998471db2c0184c91d479670ece74f9f4060
+  RNCClipboard: 61e0926e5199803936630af0fba91da692274fe4
+  RNScreens: baa2020baf5417611564f6139eeb5e5c16e708ec
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: be78ddad0c56d06a5e41eaef4bfbbd49b86a4d07
 

@@ -6,21 +6,23 @@ export default function createStyles(mode = 'light') {
   return StyleSheet.create({
     container: {
       flex: 1,
-      width: '100%',
-      height: '100%',
       justifyContent: 'center',
       alignItems: 'center',
     },
     title: {
       fontSize: 28,
-      color: isDark ? '#fff' : '#fff', // white for both here since gradient bg
-      marginBottom: 30,
+      color: '#fff',
+      marginBottom: 10,
       fontWeight: 'bold',
     },
-    otpContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
+    subtitle: {
+      fontSize: 16,
+      color: '#ccc',
+      marginBottom: 20,
+    },
+    otpWrapper: {
       width: '80%',
+      height: 60,
       marginBottom: 30,
     },
     otpInput: {
@@ -28,23 +30,17 @@ export default function createStyles(mode = 'light') {
       height: 60,
       backgroundColor: isDark ? '#222' : '#fff',
       borderRadius: 10,
-      fontSize: 20,
+      fontSize: 22,
       color: isDark ? '#fff' : '#000',
       textAlign: 'center',
       ...Platform.select({
-        ios: {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 3,
-        },
-        android: {
-          elevation: 3,
-        },
+        ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3 },
+        android: { elevation: 3 },
       }),
     },
-    inputDisabled: {
-      backgroundColor: isDark ? '#333' : '#ddd',
+    otpInputActive: {
+      borderColor: '#fff',
+      borderWidth: 2,
     },
     submitButton: {
       backgroundColor: isDark ? '#333' : '#fff',
@@ -52,16 +48,10 @@ export default function createStyles(mode = 'light') {
       paddingHorizontal: 50,
       borderRadius: 25,
       alignItems: 'center',
+      marginBottom: 15,
       ...Platform.select({
-        ios: {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.15,
-          shadowRadius: 2,
-        },
-        android: {
-          elevation: 2,
-        },
+        ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 2 },
+        android: { elevation: 2 },
       }),
     },
     buttonDisabled: {
@@ -71,6 +61,11 @@ export default function createStyles(mode = 'light') {
       color: isDark ? '#fff' : '#4a00e0',
       fontWeight: 'bold',
       fontSize: 18,
+    },
+    resendText: {
+      color: '#fff',
+      fontSize: 14,
+      marginTop: 10,
     },
   });
 }

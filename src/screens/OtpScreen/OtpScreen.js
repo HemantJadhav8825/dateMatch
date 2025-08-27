@@ -1,68 +1,47 @@
-import React, { useRef, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
   useColorScheme,
+  Platform,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import OTPInputView from '@twotalltotems/react-native-otp-input';
 import axiosClient from '../../api/axiosClient';
 import createStyles from './styles';
 import { setLocalStorage } from '../../utils';
-import { VERIFY_OTP_FOR_LOGIN } from '../../api/endpoints';
+import { VERIFY_OTP_FOR_LOGIN, SEND_OTP_FOR_LOGIN } from '../../api/endpoints';
 
 const OtpScreen = ({ navigation = {}, route = {} }) => {
-  const { phone = '9503760623', requestId } = route.params || {};
-  const scheme = useColorScheme(); // 👈 Detects light or dark mode
-  const styles = createStyles(scheme); // 👈 Generate theme-based styles
+  const { phone = '9503760623', requestId: initialRequestId } = route.params || {};
+  const scheme = useColorScheme();
+  const styles = createStyles(scheme);
 
-  const inputRefs = useRef([]);
-  const [otp, setOtp] = useState(['', '', '', '']);
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(30);
+  const [requestId, setRequestId] = useState(initialRequestId);
 
-  const handleChange = (text, index) => {
-    if (loading) return;
-    let newOtp = [...otp];
-
-    if (text === '' && otp[index] === '' && index > 0) {
-      inputRefs.current[index - 1].focus();
-      return;
+  useEffect(() => {
+    let countdown;
+    if (timer > 0) {
+      countdown = setTimeout(() => setTimer((t) => t - 1), 1000);
     }
+    return () => clearTimeout(countdown);
+  }, [timer]);
 
-    if (text.length > 1) {
-      newOtp = text.split('').slice(0, 4);
-      setOtp(newOtp);
-      if (newOtp.join('').length === 4) handleSubmit(newOtp.join(''));
-      return;
-    }
-
-    newOtp[index] = text;
-    setOtp(newOtp);
-
-    if (text && index < 3) {
-      inputRefs.current[index + 1].focus();
-    }
-
-    if (newOtp.join('').length === 4) {
-      handleSubmit(newOtp.join(''));
-    }
-  };
-
-  const handleKeyPress = ({ nativeEvent }, index) => {
-    if (loading) return;
-    if (nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs.current[index - 1].focus();
-    }
-  };
-
-  const handleSubmit = async (code = otp.join('')) => {
-    if (loading) return;
+  const handleSubmit = async (code = otp) => {
+    if (loading || code.length < 4) return;
     setLoading(true);
     try {
-      const { data } = await axiosClient.post(VERIFY_OTP_FOR_LOGIN, { phone, requestId, code });
+      const { data } = await axiosClient.post(VERIFY_OTP_FOR_LOGIN, {
+        phone,
+        requestId,
+        code,
+      });
 
       if (data) {
         await setLocalStorage('accessToken', data.accessToken);
@@ -73,8 +52,28 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
         Alert.alert('Invalid OTP', 'OTP verification failed');
       }
     } catch (error) {
-      console.log(error);
-      Alert.alert('Invalid OTP', 'Please check and try again');
+      console.error(error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    if (timer > 0) return;
+    setLoading(true);
+    try {
+      const { data } = await axiosClient.post(SEND_OTP_FOR_LOGIN, { phone });
+      if (data?.requestId) {
+        setRequestId(data.requestId);
+        setTimer(30);
+        Alert.alert('OTP Sent', `New OTP sent to ${phone}`);
+      } else {
+        Alert.alert('Error', 'Failed to send new OTP.');
+      }
+    } catch (error) {
+      console.error('Error:', error?.response || error);
+      Alert.alert('Error', error?.response?.data?.error || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -85,24 +84,21 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
       colors={scheme === 'dark' ? ['#141E30', '#243B55'] : ['#8e2de2', '#4a00e0']}
       style={styles.container}
     >
-      <Text style={styles.title}>Enter OTP</Text>
+      <Text style={styles.title}>Verify Your OTP</Text>
+      <Text style={styles.subtitle}>Sent to +91 {phone}</Text>
 
-      <View style={styles.otpContainer}>
-        {otp.map((digit, index) => (
-          <TextInput
-            key={index}
-            ref={(ref) => (inputRefs.current[index] = ref)}
-            style={[styles.otpInput, loading && styles.inputDisabled]}
-            maxLength={1}
-            keyboardType="number-pad"
-            onChangeText={(text) => handleChange(text, index)}
-            onKeyPress={(e) => handleKeyPress(e, index)}
-            value={digit}
-            textAlign="center"
-            editable={!loading}
-          />
-        ))}
-      </View>
+      <OTPInputView
+        style={styles.otpWrapper}
+        pinCount={4}
+        autoFocusOnLoad={Platform.OS === 'android'}
+        codeInputFieldStyle={styles.otpInput}
+        codeInputHighlightStyle={styles.otpInputActive}
+        onCodeFilled={handleSubmit}
+        keyboardType={Platform.OS === 'ios' ? 'numeric' : 'number-pad'}
+        textContentType="oneTimeCode"
+        autoComplete="sms-otp"
+        importantForAutofill="yes"
+      />
 
       <TouchableOpacity
         style={[styles.submitButton, loading && styles.buttonDisabled]}
@@ -114,6 +110,12 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
         ) : (
           <Text style={styles.submitText}>Verify</Text>
         )}
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={resendOtp} disabled={timer > 0 || loading}>
+        <Text style={styles.resendText}>
+          {timer > 0 ? `Resend OTP in ${timer}s` : 'Resend OTP'}
+        </Text>
       </TouchableOpacity>
     </LinearGradient>
   );
