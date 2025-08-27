@@ -3,6 +3,7 @@ import { socketURL, baseURL } from "../env/allEnv"; // baseURL points to your RE
 import { navigate } from "../components/RootNavigation"; // Adjust path as needed
 import axiosClient from "../api/axiosClient";
 import { getToken, removeLocalStorage, removeToken } from "../utils";
+import { CREATE_CALL_SESSION } from "../api/endpoints";
 
 let notifySocket = null;
 let isManuallyDisconnected = false;
@@ -101,7 +102,7 @@ export function getNotifySocket() {
 // NEW: create call session (HTTP API)
 async function createCallSession(calleeId) {
   try {
-    const { data } = await axiosClient.post('/call/call-sessions', { calleeId });
+    const { data } = await axiosClient.post(CREATE_CALL_SESSION, { calleeId });
 
     return data;
   } catch (error) {

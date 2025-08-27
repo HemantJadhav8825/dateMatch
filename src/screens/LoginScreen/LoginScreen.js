@@ -12,6 +12,7 @@ import {
 import axiosClient from '../../api/axiosClient';
 import { useTheme } from '@react-navigation/native'; // 👈 for theme
 import createStyles from './styles';
+import { SEND_OTP_FOR_LOGIN } from '../../api/endpoints'; // 👈 import your endpoint
 
 const LoginScreen = ({ navigation }) => {
   const { colors, dark } = useTheme(); // 👈 get theme colors and dark mode flag
@@ -32,7 +33,7 @@ const LoginScreen = ({ navigation }) => {
     if (phone.length === 10) {
       setLoading(true);
       try {
-        const { data } = await axiosClient.post('/auth/otp/start', { phone });
+        const { data } = await axiosClient.post(SEND_OTP_FOR_LOGIN, { phone });
         navigation.navigate('Otp', { phone, requestId: data?.requestId });
       } catch (error) {
         console.error('Error:', error);

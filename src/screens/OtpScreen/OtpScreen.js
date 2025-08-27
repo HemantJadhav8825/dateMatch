@@ -12,6 +12,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import axiosClient from '../../api/axiosClient';
 import createStyles from './styles';
 import { setLocalStorage } from '../../utils';
+import { VERIFY_OTP_FOR_LOGIN } from '../../api/endpoints';
 
 const OtpScreen = ({ navigation = {}, route = {} }) => {
   const { phone = '9503760623', requestId } = route.params || {};
@@ -61,7 +62,7 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
     if (loading) return;
     setLoading(true);
     try {
-      const { data } = await axiosClient.post('/auth/otp/verify', { phone, requestId, code });
+      const { data } = await axiosClient.post(VERIFY_OTP_FOR_LOGIN, { phone, requestId, code });
 
       if (data) {
         await setLocalStorage('accessToken', data.accessToken);
