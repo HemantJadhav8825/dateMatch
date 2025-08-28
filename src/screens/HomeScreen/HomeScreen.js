@@ -18,8 +18,7 @@ const HomeScreen = ({ navigation }) => {
     (async () => {
       try {
         const { data } = await axiosClient.get(GET_ALL_USERS);
-        console.log("All Users Data:", data);
-        setAllUsers(data);
+        setAllUsers(data?.users);
       } catch (error) {
         console.error("Error in Home Screen useEffect:GET_ALL_USERS", error);
       }
@@ -30,8 +29,8 @@ const HomeScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Private Training</Text>
       <FlatList
-        data={avatars}
-        renderItem={({ item }) => <RenderAvatar item={item} styles={styles} />}
+        data={allUsers}
+        renderItem={({ item }) => <RenderAvatar user={item} styles={styles} />}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
