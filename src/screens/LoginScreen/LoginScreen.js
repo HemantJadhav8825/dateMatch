@@ -90,13 +90,21 @@ const LoginScreen = ({ navigation }) => {
               {
                 backgroundColor: themeConfig.colors.inputBackground,
                 borderColor: themeConfig.colors.inputBorder,
+                height: 50,
+                borderRadius: 8,
               },
             ]}
             textContainerStyle={{
               backgroundColor: themeConfig.colors.inputBackground,
+              paddingVertical: 0,
+              paddingHorizontal: 12, // horizontal padding added
+              height: 50,
             }}
             textInputStyle={{
               color: dark ? '#fff' : '#000',
+              paddingVertical: 0,
+              // textAlign: 'center', // centers the number horizontally
+              textAlignVertical: 'center', // aligns text vertically in Android
             }}
             codeTextStyle={{
               color: dark ? '#fff' : '#000',
