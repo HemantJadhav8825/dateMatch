@@ -25,7 +25,7 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
   const [timer, setTimer] = useState(30);
   const [requestId, setRequestId] = useState(initialRequestId);
 
-  // Countdown timer for resend
+  // Countdown timer
   useEffect(() => {
     let countdown;
     if (timer > 0) {
@@ -105,7 +105,7 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
         numberOfDigits={4}
         focusColor={scheme === 'dark' ? '#fff' : '#4a00e0'}
         onTextChange={setOtp}
-        onFilled={(code) => handleSubmit(code)}
+        onFilled={handleSubmit}
         theme={{
           containerStyle: styles.otpWrapper,
           pinCodeContainerStyle: styles.otpInput,
@@ -117,9 +117,12 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
       />
 
       <TouchableOpacity
-        style={[styles.submitButton, loading && styles.buttonDisabled]}
+        style={[
+          styles.submitButton,
+          (loading || otp.length < 4) && styles.buttonDisabled
+        ]}
         onPress={() => handleSubmit()}
-        disabled={loading}
+        disabled={loading || otp.length < 4}
       >
         {loading ? (
           <ActivityIndicator size="small" color={scheme === 'dark' ? '#fff' : '#4a00e0'} />
