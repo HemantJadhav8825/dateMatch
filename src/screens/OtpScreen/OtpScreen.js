@@ -48,7 +48,13 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
         await setLocalStorage('accessToken', data.accessToken);
         await setLocalStorage('refreshToken', data.refreshToken);
         await setLocalStorage('userId', data?.user?.id);
-        navigation?.replace('Home');
+        // Check if user already has profile details
+        const isNewUser = !data?.user?.nickname;
+        if (isNewUser) {
+          navigation?.replace('UserInfo', { phone });
+        } else {
+          navigation?.replace('Home');
+        }
       } else {
         Toast.show({ type: 'error', text1: 'Invalid OTP', text2: 'OTP verification failed' });
       }
