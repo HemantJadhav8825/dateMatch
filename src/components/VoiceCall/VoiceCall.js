@@ -18,8 +18,8 @@ const VoiceCallScreen = ({ route }) => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme);
   const navigation = useNavigation();
-
-  const { token, room, isCaller } = route.params;
+  console.log("Route Params:", route);
+  const { token, room, isCaller } = route?.params || {};
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
 

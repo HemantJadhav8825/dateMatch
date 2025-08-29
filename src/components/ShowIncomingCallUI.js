@@ -12,7 +12,7 @@ const showIncomingCallUI = ({ sessionId, from, room, token }) => {
         text: "Accept",
         onPress: () => {
           acceptCall(sessionId);
-          navigate("VoiceCallScreen", {
+          navigate("VoiceCall", {
             token,
             room,
             isCaller: false,
