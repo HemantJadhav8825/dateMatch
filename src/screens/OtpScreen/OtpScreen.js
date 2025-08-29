@@ -15,7 +15,7 @@ import { setLocalStorage } from '../../utils';
 import { VERIFY_OTP_FOR_LOGIN, SEND_OTP_FOR_LOGIN } from '../../api/endpoints';
 import Toast from 'react-native-toast-message';
 
-const OtpScreen = ({ navigation = {}, route = {} }) => {
+const OtpScreen = ({ /*navigation = {},*/ route = {} }) => {
   const { phone = '9503760623', requestId: initialRequestId } = route.params || {};
   const scheme = useColorScheme();
   const styles = createStyles(scheme);
@@ -51,9 +51,9 @@ const OtpScreen = ({ navigation = {}, route = {} }) => {
         // Check if user already has profile details
         const isNewUser = !data?.user?.nickname;
         if (isNewUser) {
-          navigation?.replace('UserInfo', { phone });
+          navigate('UserInfo', { phone });
         } else {
-          navigation?.replace('Home');
+          navigate('Home');
         }
       } else {
         Toast.show({ type: 'error', text1: 'Invalid OTP', text2: 'OTP verification failed' });

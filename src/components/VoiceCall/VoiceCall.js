@@ -11,13 +11,12 @@ import {
   RTCIceCandidate,
   RTCSessionDescription,
 } from "react-native-webrtc";
-import { useNavigation } from "@react-navigation/native";
 import { getNotifySocket } from "../CallNotifier";
+import { navigate } from "../RootNavigation";
 
 const VoiceCallScreen = ({ route }) => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme);
-  const navigation = useNavigation();
   console.log("Route Params:", route);
   if (!route?.params) {
     return (
@@ -114,7 +113,7 @@ const VoiceCallScreen = ({ route }) => {
     InCallManager.stop();
     notifySocket.emit("call:end", { room, reason: "hangup" });
     pc.current?.close();
-    navigation.navigate("Home");
+    navigate("Home");
   };
 
   return (

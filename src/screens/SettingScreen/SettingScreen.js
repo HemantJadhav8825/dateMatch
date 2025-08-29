@@ -10,8 +10,9 @@ import {
 import { ThemeContext } from '../../theme/ThemeContext';
 import getStyles from './styles';
 import { removeToken } from '../../utils';
+import { navigate } from '../../components/RootNavigation';
 
-const SettingsScreen = ({ navigation }) => {
+const SettingsScreen = () => {
   const { isDark, theme, toggleTheme } = useContext(ThemeContext);
   const styles = getStyles(theme); // dynamic styles based on theme
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -19,7 +20,7 @@ const SettingsScreen = ({ navigation }) => {
   const onLogout = () => {
     removeToken().then(() => {
       Alert.alert('Logged out');
-      navigation.navigate('Login');
+      navigate('Login');
     });
   };
 

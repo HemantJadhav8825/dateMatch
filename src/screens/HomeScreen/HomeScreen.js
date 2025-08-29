@@ -9,7 +9,7 @@ import RenderRoom from './homeComponents/RenderRoom';
 import axiosClient from '../../api/axiosClient';
 import { GET_ALL_USERS } from '../../api/endpoints';
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = () => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme);
   const [allUsers, setAllUsers] = useState([]);
