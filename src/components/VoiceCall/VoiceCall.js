@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, ImageBackground } from "react-native";
+import { View, Text, TouchableOpacity, ImageBackground, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemeContext } from "../../theme/ThemeContext";
 import { createStyles } from "./styles";
@@ -19,6 +19,13 @@ const VoiceCallScreen = ({ route }) => {
   const styles = createStyles(theme);
   const navigation = useNavigation();
   console.log("Route Params:", route);
+  if (!route?.params) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
   const { token, room, isCaller } = route?.params || {};
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
