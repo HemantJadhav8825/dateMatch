@@ -52,7 +52,7 @@ const OtpScreen = ({ /*navigation = {},*/ route = {} }) => {
         // Check if user already has profile details
         const isNewUser = !data?.user?.nickname;
         if (isNewUser) {
-          navigate('UserInfo', { phone });
+          navigate('UserInfo');
         } else {
           navigate('Home');
         }
