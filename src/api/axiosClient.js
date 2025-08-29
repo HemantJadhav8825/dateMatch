@@ -10,7 +10,7 @@ const axiosClient = axios.create({
   },
 });
 
-// Add async interceptor to inject token from AsyncStorage
+// Add async interceptor to inject token
 axiosClient.interceptors.request.use(
   async (config) => {
     const token = await getToken();

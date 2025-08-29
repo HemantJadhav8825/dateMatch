@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { darkTheme, lightTheme } from './index';
+import { getLocalStorage, setLocalStorage } from '../utils';
 
 export const ThemeContext = createContext({
   isDark: false,
@@ -13,7 +13,7 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     // Load saved theme from storage
-    AsyncStorage.getItem('theme').then((storedTheme) => {
+    getLocalStorage('theme').then((storedTheme) => {
       if (storedTheme) {
         setIsDark(storedTheme === 'dark');
       }
@@ -23,7 +23,7 @@ export const ThemeProvider = ({ children }) => {
   const toggleTheme = async () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
-    await AsyncStorage.setItem('theme', newTheme ? 'dark' : 'light');
+    await setLocalStorage('theme', newTheme ? 'dark' : 'light');
   };
 
   return (
