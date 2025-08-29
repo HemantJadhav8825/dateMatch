@@ -1,7 +1,7 @@
 // src/hooks/useNotifySocket.js
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Alert, ToastAndroid, Platform } from 'react-native';
-import { getLocalStorage, getToken } from '../utils';
+import { getAccessToken, getLocalStorage } from '../utils';
 import { initNotifySocket, disconnectNotifySocket, isNotifySocketAlive } from '../components/CallNotifier';
 import { showIncomingCallUI } from '../components/ShowIncomingCallUI';
 
@@ -54,7 +54,7 @@ export function useNotifySocket() {
 
     const initialize = async () => {
       try {
-        const token = await getToken();
+        const token = await getAccessToken();
         if (!isMounted) return;
 
         setAccessToken(token);

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { ThemeContext } from '../../theme/ThemeContext';
 import getStyles from './styles';
-import { removeToken } from '../../utils';
+import { clearTokens } from '../../utils';
 import { navigate } from '../../components/RootNavigation';
 
 const SettingsScreen = () => {
@@ -18,7 +18,7 @@ const SettingsScreen = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const onLogout = () => {
-    removeToken().then(() => {
+    clearTokens().then(() => {
       Alert.alert('Logged out');
       navigate('Login');
     });

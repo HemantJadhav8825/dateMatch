@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken } from '../utils';
+import { getAccessToken } from '../utils';
 import { baseURL } from '../env/allEnv';
 
 const axiosClient = axios.create({
@@ -13,7 +13,7 @@ const axiosClient = axios.create({
 // Add async interceptor to inject token
 axiosClient.interceptors.request.use(
   async (config) => {
-    const token = await getToken();
+    const token = await getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -1,8 +1,8 @@
 import io from "socket.io-client";
-import { socketURL, baseURL } from "../env/allEnv"; // baseURL points to your REST API base (e.g., http://<SERVER_IP>:5004)
+import { socketURL } from "../env/allEnv"; // baseURL points to your REST API base (e.g., http://<SERVER_IP>:5004)
 import { navigate } from "../components/RootNavigation"; // Adjust path as needed
 import axiosClient from "../api/axiosClient";
-import { getToken, removeLocalStorage, removeToken } from "../utils";
+import { clearTokens, getAccessToken, removeLocalStorage } from "../utils";
 import { CREATE_CALL_SESSION } from "../api/endpoints";
 
 let notifySocket = null;
@@ -42,7 +42,7 @@ notifySocket.on("connect_error", async (error) => {
     console.warn("Unauthorized socket connection. Logging out...");
 
     try {
-      await removeToken();               // Clear token
+      await clearTokens();               // Clear token
       await removeLocalStorage('userId'); // Clear userId
     } catch (e) {
       console.error("Failed to clear local storage:", e);
@@ -113,7 +113,7 @@ async function createCallSession(calleeId) {
 
 export async function startCall(targetUserId) {
   try {
-    const token = await getToken();
+    const token = await getAccessToken();
     const session = await createCallSession(targetUserId);
 
     navigate("VoiceCall", {
