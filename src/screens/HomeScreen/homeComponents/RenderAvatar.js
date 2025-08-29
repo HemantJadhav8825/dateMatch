@@ -3,7 +3,7 @@ import { startCall } from '../../../components/CallNotifier';
 
 const RenderAvatar = ({ user, styles }) => {
   return (
-    <View style={styles.avatarCard}>
+    <View key={user?._id} style={styles.avatarCard}>
       <View style={styles.avatarImageWrapper}>
         <Image
           source={require('../../../assets/bg.png')}

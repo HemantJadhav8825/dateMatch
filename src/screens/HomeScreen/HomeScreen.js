@@ -25,6 +25,8 @@ const HomeScreen = ({ navigation }) => {
     })();
   }, []);
 
+  console.log("All Users:", allUsers);
+
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Private Training</Text>
