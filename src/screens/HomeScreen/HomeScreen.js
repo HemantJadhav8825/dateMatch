@@ -32,8 +32,8 @@ const HomeScreen = () => {
       <Text style={styles.sectionTitle}>Private Training</Text>
       <FlatList
         data={allUsers}
-        renderItem={({ item }) => <RenderAvatar user={item} styles={styles} />}
-        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <RenderAvatar key={item?._id} user={item} styles={styles} />}
+        keyExtractor={(item) => item._id}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 15 }}
@@ -42,7 +42,7 @@ const HomeScreen = () => {
       <Text style={styles.sectionTitle}>All Room Types</Text>
       <FlatList
         data={roomTypes}
-        renderItem={({ item }) => <RenderRoom item={item} styles={styles} />}
+        renderItem={({ item }) => <RenderRoom key={item?.id} item={item} styles={styles} />}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -51,7 +51,7 @@ const HomeScreen = () => {
       <Text style={styles.sectionTitle}>Other Room Types</Text>
       <FlatList
         data={roomTypes}
-        renderItem={({ item }) => <RenderRoom item={item} styles={styles} />}
+        renderItem={({ item }) => <RenderRoom key={item?.id} item={item} styles={styles} />}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
