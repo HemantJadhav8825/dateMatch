@@ -14,6 +14,7 @@ import createStyles from './styles';
 import { setLocalStorage } from '../../utils';
 import { VERIFY_OTP_FOR_LOGIN, SEND_OTP_FOR_LOGIN } from '../../api/endpoints';
 import Toast from 'react-native-toast-message';
+import { navigate } from '../../components/RootNavigation';
 
 const OtpScreen = ({ /*navigation = {},*/ route = {} }) => {
   const { phone = '9503760623', requestId: initialRequestId } = route.params || {};
