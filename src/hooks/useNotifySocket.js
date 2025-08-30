@@ -2,8 +2,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Alert, ToastAndroid, Platform } from 'react-native';
 import { getAccessToken, getLocalStorage } from '../utils';
-import { initNotifySocket, disconnectNotifySocket, isNotifySocketAlive } from '../components/CallNotifier';
+import {
+  initNotifySocket,
+  disconnectNotifySocket,
+  isNotifySocketAlive,
+} from '../components/CallNotifier';
 import { showIncomingCallUI } from '../components/ShowIncomingCallUI';
+import Toast from 'react-native-toast-message';
 
 export function useNotifySocket() {
   const [loading, setLoading] = useState(true);
@@ -12,15 +17,20 @@ export function useNotifySocket() {
   const socketInitialized = useRef(false);
   const userIdRef = useRef(null);
 
-  const showReconnectionError = (message) => {
+  const showReconnectionError = message => {
     if (Platform.OS === 'android') {
       ToastAndroid.show(message, ToastAndroid.LONG);
     } else {
-      Alert.alert('Reconnection Failed', message);
+      Toast.show({
+        position: 'bottom',
+        type: 'success',
+        text1: 'Reconnection Failed',
+        text2: message,
+      });
     }
   };
 
-  const connectSocket = async (token) => {
+  const connectSocket = async token => {
     if (socketInitialized.current || !token) return;
     try {
       const userId = await getLocalStorage('userId');
@@ -33,19 +43,21 @@ export function useNotifySocket() {
       initNotifySocket(
         userId,
         token,
-        (callData) => {
+        callData => {
           showIncomingCallUI(callData);
         },
-        (chatMessage) => {
+        chatMessage => {
           console.log('New chat message:', chatMessage);
-        }
+        },
       );
 
       socketInitialized.current = true;
       console.log('Socket connected successfully');
     } catch (error) {
       console.error('Socket connection error:', error);
-      showReconnectionError('Unable to reconnect to server. Calls and chat may not work.');
+      showReconnectionError(
+        'Unable to reconnect to server. Calls and chat may not work.',
+      );
     }
   };
 
@@ -63,7 +75,12 @@ export function useNotifySocket() {
         }
       } catch (error) {
         console.error('Initialization failed:', error);
-        Alert.alert('Initialization failed', 'Please try restarting the app.');
+        Toast.show({
+          position: 'bottom',
+          type: 'success',
+          text1: 'Initialization failed',
+          text2: 'Please try restarting the app.',
+        });
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -71,27 +88,37 @@ export function useNotifySocket() {
 
     initialize();
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Handle app state changes for reconnection
   useEffect(() => {
-    const handleAppStateChange = async (nextAppState) => {
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+    const handleAppStateChange = async nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
         if (accessToken && userIdRef.current) {
           console.log('App resumed. Reconnecting socket...');
           socketInitialized.current = false;
           try {
             await connectSocket(accessToken);
           } catch {
-            showReconnectionError('Reconnection failed. Please check your internet.');
+            showReconnectionError(
+              'Reconnection failed. Please check your internet.',
+            );
           }
         }
       }
       appState.current = nextAppState;
     };
 
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
     return () => subscription.remove();
   }, [accessToken]);
 

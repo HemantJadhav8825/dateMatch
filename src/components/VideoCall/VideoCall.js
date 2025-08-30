@@ -6,21 +6,20 @@ import {
   PermissionsAndroid,
   Platform,
   TouchableOpacity,
-  Alert
+  Alert,
 } from 'react-native';
 import {
   RTCPeerConnection,
   RTCView,
   mediaDevices,
-  MediaStream
+  MediaStream,
 } from 'react-native-webrtc';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Ensure installed: react-native-vector-icons
 import styles from './styles';
+import Toast from 'react-native-toast-message';
 
 const configuration = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' }
-  ]
+  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
 };
 
 export default function VideoCall() {
@@ -38,22 +37,31 @@ export default function VideoCall() {
             PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
           ]);
           if (
-            granted['android.permission.CAMERA'] !== PermissionsAndroid.RESULTS.GRANTED ||
-            granted['android.permission.RECORD_AUDIO'] !== PermissionsAndroid.RESULTS.GRANTED
+            granted['android.permission.CAMERA'] !==
+              PermissionsAndroid.RESULTS.GRANTED ||
+            granted['android.permission.RECORD_AUDIO'] !==
+              PermissionsAndroid.RESULTS.GRANTED
           ) {
-            Alert.alert('Permissions not granted');
+            Toast.show({
+              position: 'bottom',
+              type: 'error',
+              text1: 'Permissions not granted',
+            });
             return;
           }
         }
 
         pc.current = new RTCPeerConnection(configuration);
 
-        const stream = await mediaDevices.getUserMedia({ audio: true, video: true });
+        const stream = await mediaDevices.getUserMedia({
+          audio: true,
+          video: true,
+        });
         setLocalStream(stream);
 
         stream.getTracks().forEach(track => pc.current.addTrack(track, stream));
 
-        pc.current.ontrack = (event) => {
+        pc.current.ontrack = event => {
           if (event.streams && event.streams[0]) {
             setRemoteStream(event.streams[0]);
           } else {
@@ -93,7 +101,11 @@ export default function VideoCall() {
     localStream?.getTracks().forEach(track => track.stop());
     setLocalStream(null);
     setRemoteStream(null);
-    Alert.alert('Call ended');
+    Toast.show({
+      position: 'bottom',
+      type: 'success',
+      text1: 'Call ended',
+    });
   };
 
   return (
@@ -122,14 +134,26 @@ export default function VideoCall() {
 
       <View style={styles.controls}>
         <TouchableOpacity style={styles.controlButton} onPress={toggleMute}>
-          <Icon name={isMuted ? "microphone-off" : "microphone"} size={28} color="white" />
+          <Icon
+            name={isMuted ? 'microphone-off' : 'microphone'}
+            size={28}
+            color="white"
+          />
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.controlButton, styles.endButton]} onPress={endCall}>
+        <TouchableOpacity
+          style={[styles.controlButton, styles.endButton]}
+          onPress={endCall}
+        >
           <Icon name="phone-hangup" size={28} color="white" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.controlButton} onPress={() => { /* Switch camera */ }}>
+        <TouchableOpacity
+          style={styles.controlButton}
+          onPress={() => {
+            /* Switch camera */
+          }}
+        >
           <Icon name="camera-switch" size={28} color="white" />
         </TouchableOpacity>
       </View>
