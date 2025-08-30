@@ -15,7 +15,7 @@ import { setLocalStorage, setTokens } from '../../utils';
 import { VERIFY_OTP_FOR_LOGIN, SEND_OTP_FOR_LOGIN } from '../../api/endpoints';
 import Toast from 'react-native-toast-message';
 import { navigate } from '../../components/RootNavigation';
-import { AuthContext } from '../../components/AuthProvider';
+import { AuthContext } from '../../providers/AuthProvider';
 
 const OtpScreen = ({ route = {} }) => {
   const { phone, requestId: initialRequestId } = route.params || {};
