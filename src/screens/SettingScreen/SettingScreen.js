@@ -11,6 +11,7 @@ import { ThemeContext } from '../../theme/ThemeContext';
 import getStyles from './styles';
 import { navigate } from '../../components/RootNavigation';
 import { AuthContext } from '../../providers/AuthProvider';
+import Toast from 'react-native-toast-message';
 
 const SettingsScreen = () => {
   const { isDark, theme, toggleTheme } = useContext(ThemeContext);
@@ -20,8 +21,11 @@ const SettingsScreen = () => {
 
   const onLogout = () => {
     logout().then(() => {
-      Alert.alert('Logged out');
-      // navigate('Login');
+      Toast.show({
+        position: 'bottom',
+        type: 'success',
+        text1: 'Logged out',
+      });
     });
   };
 

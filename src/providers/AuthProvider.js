@@ -5,6 +5,7 @@ import {
   setTokens,
   clearTokens
 } from '../utils'; // Same utils as before
+import { navigate } from '../components/RootNavigation';
 
 export const AuthContext = createContext({
   isLoggedIn: false,
@@ -69,6 +70,7 @@ const AuthProvider = ({ children }) => {
     lastTokenRef.current = null;
     setIsLoggedIn(false);
     setUser(null);
+    navigate('Login');
   }, []);
 
   const refresh = useCallback(async () => {
