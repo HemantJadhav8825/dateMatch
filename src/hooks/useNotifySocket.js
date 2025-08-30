@@ -112,5 +112,5 @@ export function useNotifySocket() {
     return () => clearInterval(interval);
   }, []);
 
-  return { loading, accessToken };
+  return { loading };
 }

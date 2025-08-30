@@ -5,7 +5,7 @@ import { useNotifySocket } from './src/hooks/useNotifySocket';
 import Toast from 'react-native-toast-message';
 
 const AppNavigator = () => {
-  const { loading, accessToken } = useNotifySocket();
+  const { loading } = useNotifySocket();
 
   if (loading) {
     return (
@@ -17,7 +17,7 @@ const AppNavigator = () => {
 
   return (
     <>
-      <StackNavigator initialRouteName={accessToken ? 'Home' : 'Login'} />
+      <StackNavigator initialRouteName={'Home'} />
       <Toast />
     </>
   );
