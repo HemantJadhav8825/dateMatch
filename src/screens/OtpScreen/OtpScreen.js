@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import { OtpInput } from 'react-native-otp-entry';
 import axiosClient from '../../api/axiosClient';
 import createStyles from './styles';
-import { setLocalStorage } from '../../utils';
+import { setLocalStorage, setTokens } from '../../utils';
 import { VERIFY_OTP_FOR_LOGIN, SEND_OTP_FOR_LOGIN } from '../../api/endpoints';
 import Toast from 'react-native-toast-message';
 import { navigate } from '../../components/RootNavigation';
+import { AuthContext } from '../../components/AuthProvider';
 
 const OtpScreen = ({ route = {} }) => {
   const { phone, requestId: initialRequestId } = route.params || {};
@@ -25,6 +26,7 @@ const OtpScreen = ({ route = {} }) => {
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(30);
   const [requestId, setRequestId] = useState(initialRequestId);
+  const { login } = useContext(AuthContext);
 
   // Countdown timer
   useEffect(() => {
@@ -45,17 +47,16 @@ const OtpScreen = ({ route = {} }) => {
         code,
       });
 
-      if (data) {
-        await setLocalStorage('accessToken', data.accessToken);
-        await setLocalStorage('refreshToken', data.refreshToken);
+      if (data?.accessToken && data?.refreshToken) {
+        // Only store userId if needed
         await setLocalStorage('userId', data?.user?.id);
-        // Check if user already has profile details
+
+        // Let AuthProvider handle tokens and auth state
+        await login(data.accessToken, data.refreshToken);
+
+        // Navigation logic
         const isNewUser = !data?.user?.nickname;
-        if (isNewUser) {
-          navigate('UserInfo');
-        } else {
-          navigate('Home');
-        }
+        navigate(isNewUser ? 'UserInfo' : 'Home');
       } else {
         Toast.show({ type: 'error', text1: 'Invalid OTP', text2: 'OTP verification failed' });
       }
