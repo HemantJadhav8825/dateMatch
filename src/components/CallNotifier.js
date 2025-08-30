@@ -6,6 +6,7 @@ import axiosClient from "../api/axiosClient";
 import { clearTokens, getAccessToken, removeLocalStorage, getRefreshToken, setTokens, } from "../utils";
 import { CREATE_CALL_SESSION } from "../api/endpoints";
 import { baseURL } from '../env/allEnv';
+import { STACK_ROUTES } from "../constants/routes";
 
 let notifySocket = null;
 let isManuallyDisconnected = false;
@@ -56,7 +57,7 @@ notifySocket.on("connect_error", async (error) => {
       notifySocket = null;
     }
 
-    navigate("Login");
+    navigate(STACK_ROUTES.LOGIN);
     return; // Don't reconnect if unauthorized
   }
 
@@ -101,7 +102,7 @@ notifySocket.on("connect_error", async (error) => {
         notifySocket = null;
       }
 
-      navigate("Login");
+      navigate(STACK_ROUTES.LOGIN);
       return;
     }
   }
@@ -164,7 +165,7 @@ export async function startCall(targetUserId) {
     const token = await getAccessToken();
     const session = await createCallSession(targetUserId);
 
-    navigate("VoiceCall", {
+    navigate(STACK_ROUTES.VOICE_CALL, {
       token,
       room: session.room,
       isCaller: true,

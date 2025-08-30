@@ -16,6 +16,7 @@ import { VERIFY_OTP_FOR_LOGIN, SEND_OTP_FOR_LOGIN } from '../../api/endpoints';
 import Toast from 'react-native-toast-message';
 import { navigate } from '../../components/RootNavigation';
 import { AuthContext } from '../../providers/AuthProvider';
+import { STACK_ROUTES } from '../../constants/routes';
 
 const OtpScreen = ({ route = {} }) => {
   const { phone, requestId: initialRequestId } = route.params || {};
@@ -57,7 +58,7 @@ const OtpScreen = ({ route = {} }) => {
         // Navigation logic
         const isNewUser = !data?.user?.nickname;
 
-        navigate(isNewUser ? 'UserInfo' : 'Home');
+        navigate(isNewUser ? STACK_ROUTES.USER_INFO : STACK_ROUTES.HOME);
       } else {
         Toast.show({ type: 'error', text1: 'Invalid OTP', text2: 'OTP verification failed' });
       }

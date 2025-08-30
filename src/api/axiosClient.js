@@ -4,6 +4,7 @@ import { baseURL } from '../env/allEnv';
 import { getAccessToken, getRefreshToken } from '../utils/index';
 import { refreshTokenFlow, addRefreshSubscriber } from '../utils/tokenUtils';
 import { navigate } from '../components/RootNavigation';
+import { STACK_ROUTES } from '../constants/routes';
 
 const axiosClient = axios.create({
   baseURL,
@@ -35,7 +36,7 @@ axiosClient.interceptors.response.use(
     const accessToken = await getAccessToken();
     const refreshToken = await getRefreshToken();
     if (!accessToken || !refreshToken) {
-      navigate('Login');
+      navigate(STACK_ROUTES.LOGIN);
       return Promise.reject(error);
     }
     const originalRequest = error.config;

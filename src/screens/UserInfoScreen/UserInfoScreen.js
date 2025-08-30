@@ -12,6 +12,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import axiosClient from '../../api/axiosClient';
 import Toast from 'react-native-toast-message';
 import { navigate } from '../../components/RootNavigation';
+import { STACK_ROUTES } from '../../constants/routes';
 
 const UserInfoScreen = () => {
     const scheme = useColorScheme();
@@ -35,7 +36,7 @@ const UserInfoScreen = () => {
                 gender,
             });
             if (data) {
-                navigate('Home');
+                navigate(STACK_ROUTES.HOME);
             }
         } catch (error) {
             console.error('Error saving user info:', error?.response?.data);

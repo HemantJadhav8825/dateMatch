@@ -14,6 +14,7 @@ import { useTheme } from '@react-navigation/native';
 import createStyles from './styles';
 import { SEND_OTP_FOR_LOGIN } from '../../api/endpoints';
 import { navigate } from '../../components/RootNavigation';
+import { STACK_ROUTES } from '../../constants/routes';
 
 const LoginScreen = ({ /*navigation*/ }) => {
   const { colors, dark } = useTheme();
@@ -48,7 +49,7 @@ const LoginScreen = ({ /*navigation*/ }) => {
     setLoading(true);
     try {
       const { data } = await axiosClient.post(SEND_OTP_FOR_LOGIN, { phone });
-      navigate('Otp', { phone: phone, requestId: data?.requestId });
+      navigate(STACK_ROUTES.OTP, { phone: phone, requestId: data?.requestId });
     } catch (error) {
       console.error('Error:', error?.response || error);
       setError(error?.response?.data?.error || 'Failed to send OTP. Please try again.');

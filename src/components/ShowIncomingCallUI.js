@@ -1,6 +1,7 @@
 import { Alert } from "react-native";
 import { acceptCall, rejectCall } from "./CallNotifier";
 import { navigate } from "../components/RootNavigation"; // path may differ
+import { STACK_ROUTES } from "../constants/routes";
 
 const showIncomingCallUI = ({ sessionId, from, room, token }) => {
   Alert.alert(
@@ -12,7 +13,7 @@ const showIncomingCallUI = ({ sessionId, from, room, token }) => {
         text: "Accept",
         onPress: () => {
           acceptCall(sessionId);
-          navigate("VoiceCall", {
+          navigate(STACK_ROUTES.VOICE_CALL, {
             token,
             room,
             isCaller: false,

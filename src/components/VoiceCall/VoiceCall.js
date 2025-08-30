@@ -13,6 +13,7 @@ import {
 } from "react-native-webrtc";
 import { getNotifySocket } from "../CallNotifier";
 import { navigate } from "../RootNavigation";
+import { STACK_ROUTES } from "../../constants/routes";
 
 const VoiceCallScreen = ({ route }) => {
   const { theme } = useContext(ThemeContext);
@@ -113,7 +114,7 @@ const VoiceCallScreen = ({ route }) => {
     InCallManager.stop();
     notifySocket.emit("call:end", { room, reason: "hangup" });
     pc.current?.close();
-    navigate("Home");
+    navigate(STACK_ROUTES.HOME);
   };
 
   return (

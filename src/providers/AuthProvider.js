@@ -6,6 +6,7 @@ import {
   clearTokens
 } from '../utils'; // Same utils as before
 import { navigate } from '../components/RootNavigation';
+import { STACK_ROUTES } from '../constants/routes';
 
 export const AuthContext = createContext({
   isLoggedIn: false,
@@ -70,7 +71,7 @@ const AuthProvider = ({ children }) => {
     lastTokenRef.current = null;
     setIsLoggedIn(false);
     setUser(null);
-    navigate('Login');
+    navigate(STACK_ROUTES.LOGIN);
   }, []);
 
   const refresh = useCallback(async () => {
