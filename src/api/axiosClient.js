@@ -1,35 +1,51 @@
+// services/axiosClient.js
 import axios from 'axios';
-import { getAccessToken } from '../utils';
 import { baseURL } from '../env/allEnv';
+import { getAccessToken } from '../utils/index';
+import { refreshTokenFlow, addRefreshSubscriber } from '../utils/tokenUtils';
 
 const axiosClient = axios.create({
-  baseURL: baseURL,
+  baseURL,
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 });
 
-// Add async interceptor to inject token
+// Request Interceptor
 axiosClient.interceptors.request.use(
   async (config) => {
     const token = await getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('📤 Request:', config.method.toUpperCase(),baseURL + config.url, config.data || config.params);
+    console.log('📤 Request:', config.method.toUpperCase(), baseURL + config.url, config.data || config.params);
     return config;
   },
   (error) => Promise.reject(error)
 );
 
+// Response Interceptor
 axiosClient.interceptors.response.use(
   (response) => {
     console.log('📥 Response:', response.data);
     return response;
   },
-  (error) => {
-    console.error('❌ API Error:', error?.response?.data || error.message);
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      return new Promise((resolve, reject) => {
+        addRefreshSubscriber((newToken) => {
+          if (!newToken) return reject(error);
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          resolve(axiosClient(originalRequest));
+        });
+
+        refreshTokenFlow().catch(reject);
+      });
+    }
+
     return Promise.reject(error);
   }
 );
