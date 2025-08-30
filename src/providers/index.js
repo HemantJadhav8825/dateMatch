@@ -4,6 +4,8 @@ import { ThemeProvider, ThemeContext } from '../theme/ThemeContext';
 import { navigationRef } from '../components/RootNavigation';
 import AuthProvider from './AuthProvider';
 import App from '../../App.tsx';
+import { Provider } from 'react-redux';
+import store from '../store';
 
 const Providers = () => (
   <ThemeProvider>
@@ -11,7 +13,9 @@ const Providers = () => (
       <ThemeContext.Consumer>
         {({ theme }) => (
           <NavigationContainer ref={navigationRef} theme={theme}>
-            <App />
+            <Provider store={store}>
+              <App />
+            </Provider>
           </NavigationContainer>
         )}
       </ThemeContext.Consumer>
