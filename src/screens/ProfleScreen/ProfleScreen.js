@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import createStyles from './styles'; // we will modify this
+import createStyles from './styles';
 import { ThemeContext } from '../../theme/ThemeContext';
+import { AuthContext } from '../../providers/AuthProvider';
+import Toast from 'react-native-toast-message';
 
 const user = {
   name: 'Hemant Sharma',
@@ -19,6 +21,7 @@ const user = {
 
 const ProfileScreen = () => {
   const { theme } = useContext(ThemeContext);
+  const { logout } = useContext(AuthContext);
   const styles = createStyles(theme);
 
   const onEditProfile = (field) => {
@@ -26,7 +29,13 @@ const ProfileScreen = () => {
   };
 
   const onLogout = () => {
-    console.log('Logout');
+    logout().then(() => {
+      Toast.show({
+        position: 'bottom',
+        type: 'success',
+        text1: 'Logged out',
+      });
+    });
   };
 
   return (

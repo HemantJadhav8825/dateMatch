@@ -9,18 +9,19 @@ import {
 } from 'react-native';
 import { ThemeContext } from '../../theme/ThemeContext';
 import getStyles from './styles';
-import { clearTokens } from '../../utils';
 import { navigate } from '../../components/RootNavigation';
+import { AuthContext } from '../../providers/AuthProvider';
 
 const SettingsScreen = () => {
   const { isDark, theme, toggleTheme } = useContext(ThemeContext);
   const styles = getStyles(theme); // dynamic styles based on theme
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const { logout } = useContext(AuthContext);
 
   const onLogout = () => {
-    clearTokens().then(() => {
+    logout().then(() => {
       Alert.alert('Logged out');
-      navigate('Login');
+      // navigate('Login');
     });
   };
 
