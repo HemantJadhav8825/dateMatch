@@ -1,9 +1,11 @@
 import io from "socket.io-client";
+import axios from 'axios';
 import { socketURL } from "../env/allEnv"; // baseURL points to your REST API base (e.g., http://<SERVER_IP>:5004)
 import { navigate } from "../components/RootNavigation"; // Adjust path as needed
 import axiosClient from "../api/axiosClient";
-import { clearTokens, getAccessToken, removeLocalStorage } from "../utils";
+import { clearTokens, getAccessToken, removeLocalStorage, getRefreshToken, setTokens, } from "../utils";
 import { CREATE_CALL_SESSION } from "../api/endpoints";
+import { baseURL } from '../env/allEnv';
 
 let notifySocket = null;
 let isManuallyDisconnected = false;
@@ -61,6 +63,52 @@ notifySocket.on("connect_error", async (error) => {
   scheduleReconnect();
 });
 
+notifySocket.on("connect_error", async (error) => {
+  console.error("Socket connection error:", error?.message);
+
+  if (error?.message === "unauthorized") {
+    console.warn("Unauthorized socket connection. Attempting token refresh...");
+
+    try {
+      const refreshToken = await getRefreshToken();
+      if (!refreshToken) throw new Error("No refresh token found");
+
+      // Attempt refresh
+      const response = await axios.post(`${baseURL}/auth/token/refresh`, { refreshToken });
+      const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+      // Save new tokens
+      await setTokens(accessToken, newRefreshToken);
+
+      // Reconnect socket with new token
+      notifySocket.auth = { token: accessToken };
+      notifySocket.connect();
+
+      return; // Don't log out, refresh succeeded
+    } catch (e) {
+      console.error("Token refresh failed during socket reconnect:", e?.response?.data || e.message);
+
+      try {
+        await clearTokens();
+        await removeLocalStorage('userId');
+      } catch (clearErr) {
+        console.error("Failed to clear local storage:", clearErr);
+      }
+
+      isManuallyDisconnected = true;
+      if (notifySocket) {
+        notifySocket.disconnect();
+        notifySocket = null;
+      }
+
+      navigate("Login");
+      return;
+    }
+  }
+
+  // For other errors, use your existing reconnect strategy
+  scheduleReconnect();
+});
 
 }
 
