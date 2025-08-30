@@ -13,6 +13,7 @@ import axiosClient from '../../api/axiosClient';
 import Toast from 'react-native-toast-message';
 import { navigate } from '../../components/RootNavigation';
 import { STACK_ROUTES } from '../../constants/routes';
+import { UPDATE_USER_DETAILS } from '../../api/endpoints';
 
 const UserInfoScreen = () => {
     const scheme = useColorScheme();
@@ -31,7 +32,7 @@ const UserInfoScreen = () => {
         }
         setLoading(true);
         try {
-            const { data } = await axiosClient.patch('/user/user/me', {
+            const { data } = await axiosClient.patch(UPDATE_USER_DETAILS, {
                 nickname,
                 gender,
             });
