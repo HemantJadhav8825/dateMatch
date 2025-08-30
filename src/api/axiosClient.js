@@ -30,6 +30,7 @@ axiosClient.interceptors.response.use(
     return response;
   },
   async (error) => {
+    console.error('🔁 Response err:', error?.response?.data || error.message);
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
