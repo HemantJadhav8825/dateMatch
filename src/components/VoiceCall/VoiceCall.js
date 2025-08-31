@@ -18,7 +18,7 @@ import { STACK_ROUTES } from "../../constants/routes";
 const VoiceCallScreen = ({ route }) => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme);
-  console.log("Route Params:", route);
+
   if (!route?.params) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

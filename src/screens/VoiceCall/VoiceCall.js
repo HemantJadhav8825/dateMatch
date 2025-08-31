@@ -5,8 +5,8 @@ import {
 import styles from './styles';
 import VoiceCallScreen from '../../components/VoiceCall/VoiceCall';
 
-export default function VoiceCall() {
+export default function VoiceCall({ route }) {
   return (
-      <VoiceCallScreen />
+      <VoiceCallScreen route={route} />
   );
 }

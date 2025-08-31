@@ -1,12 +1,18 @@
-import io from "socket.io-client";
+import io from 'socket.io-client';
 import axios from 'axios';
-import { socketURL } from "../env/allEnv"; // baseURL points to your REST API base (e.g., http://<SERVER_IP>:5004)
-import { navigate } from "../components/RootNavigation"; // Adjust path as needed
-import axiosClient from "../api/axiosClient";
-import { clearTokens, getAccessToken, removeLocalStorage, getRefreshToken, setTokens, } from "../utils";
-import { CREATE_CALL_SESSION } from "../api/endpoints";
+import { socketURL } from '../env/allEnv'; // baseURL points to your REST API base (e.g., http://<SERVER_IP>:5004)
+import { navigate } from '../components/RootNavigation'; // Adjust path as needed
+import axiosClient from '../api/axiosClient';
+import {
+  clearTokens,
+  getAccessToken,
+  removeLocalStorage,
+  getRefreshToken,
+  setTokens,
+} from '../utils';
+import { CREATE_CALL_SESSION } from '../api/endpoints';
 import { baseURL } from '../env/allEnv';
-import { STACK_ROUTES } from "../constants/routes";
+import { STACK_ROUTES } from '../constants/routes';
 
 let notifySocket = null;
 let isManuallyDisconnected = false;
@@ -15,85 +21,40 @@ const RECONNECT_INTERVAL = 5000; // 5 seconds
 let reconnectTimer = null;
 
 function setupListeners(onIncomingCall, onChatMessage) {
-  notifySocket.on("incoming_call", (data) => {
-    console.log("Incoming call:", data);
+  notifySocket.on('incoming_call', data => {
+    console.log('Incoming call:', data);
     if (onIncomingCall) onIncomingCall(data);
   });
 
-  notifySocket.on("call_accepted", (data) => console.log("Call accepted:", data));
-  notifySocket.on("call_rejected", (data) => console.log("Call rejected:", data));
+  notifySocket.on('call_accepted', data => console.log('Call accepted:', data));
+  notifySocket.on('call_rejected', data => console.log('Call rejected:', data));
 
   if (onChatMessage) {
-    notifySocket.on("chat_message", (msg) => {
-      console.log("New chat message:", msg);
+    notifySocket.on('chat_message', msg => {
+      console.log('New chat message:', msg);
       onChatMessage(msg);
     });
   }
 
-  notifySocket.on("disconnect", (reason) => {
-    console.warn("Socket disconnected:", reason);
+  notifySocket.on('disconnect', reason => {
+    console.warn('Socket disconnected:', reason);
     if (!isManuallyDisconnected) {
       scheduleReconnect();
     }
   });
 
-notifySocket.on("connect_error", async (error) => {
-  console.error("Socket connection error:", error?.message);
+  notifySocket.on('connect_error', async error => {
+    console.error('Socket connection error:', error?.message);
 
-  // Handle unauthorized from middleware
-  if (error?.message === "unauthorized") {
-    console.warn("Unauthorized socket connection. Logging out...");
-
-    try {
-      await clearTokens();
-      await removeLocalStorage('user');
-    } catch (e) {
-      console.error("Failed to clear local storage:", e);
-    }
-
-    isManuallyDisconnected = true;
-    if (notifySocket) {
-      notifySocket.disconnect();
-      notifySocket = null;
-    }
-
-    navigate(STACK_ROUTES.LOGIN);
-    return; // Don't reconnect if unauthorized
-  }
-
-  scheduleReconnect();
-});
-
-notifySocket.on("connect_error", async (error) => {
-  console.error("Socket connection error:", error?.message);
-
-  if (error?.message === "unauthorized") {
-    console.warn("Unauthorized socket connection. Attempting token refresh...");
-
-    try {
-      const refreshToken = await getRefreshToken();
-      if (!refreshToken) throw new Error("No refresh token found");
-
-      // Attempt refresh
-      const response = await axios.post(`${baseURL}/auth/token/refresh`, { refreshToken });
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-      // Save new tokens
-      await setTokens(accessToken, newRefreshToken);
-
-      // Reconnect socket with new token
-      notifySocket.auth = { token: accessToken };
-      notifySocket.connect();
-
-      return; // Don't log out, refresh succeeded
-    } catch (e) {
-      console.error("Token refresh failed during socket reconnect:", e?.response?.data || e.message);
+    // Handle unauthorized from middleware
+    if (error?.message === 'unauthorized') {
+      console.warn('Unauthorized socket connection. Logging out...');
 
       try {
         await clearTokens();
         await removeLocalStorage('user');
-      } catch (clearErr) {
-        console.error("Failed to clear local storage:", clearErr);
+      } catch (e) {
+        console.error('Failed to clear local storage:', e);
       }
 
       isManuallyDisconnected = true;
@@ -103,14 +64,65 @@ notifySocket.on("connect_error", async (error) => {
       }
 
       navigate(STACK_ROUTES.LOGIN);
-      return;
+      return; // Don't reconnect if unauthorized
     }
-  }
 
-  // For other errors, use your existing reconnect strategy
-  scheduleReconnect();
-});
+    scheduleReconnect();
+  });
 
+  notifySocket.on('connect_error', async error => {
+    console.error('Socket connection error:', error?.message);
+
+    if (error?.message === 'unauthorized') {
+      console.warn(
+        'Unauthorized socket connection. Attempting token refresh...',
+      );
+
+      try {
+        const refreshToken = await getRefreshToken();
+        if (!refreshToken) throw new Error('No refresh token found');
+
+        // Attempt refresh
+        const response = await axios.post(`${baseURL}/auth/token/refresh`, {
+          refreshToken,
+        });
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+        // Save new tokens
+        await setTokens(accessToken, newRefreshToken);
+
+        // Reconnect socket with new token
+        notifySocket.auth = { token: accessToken };
+        notifySocket.connect();
+
+        return; // Don't log out, refresh succeeded
+      } catch (e) {
+        console.error(
+          'Token refresh failed during socket reconnect:',
+          e?.response?.data || e.message,
+        );
+
+        try {
+          await clearTokens();
+          await removeLocalStorage('user');
+        } catch (clearErr) {
+          console.error('Failed to clear local storage:', clearErr);
+        }
+
+        isManuallyDisconnected = true;
+        if (notifySocket) {
+          notifySocket.disconnect();
+          notifySocket = null;
+        }
+
+        navigate(STACK_ROUTES.LOGIN);
+        return;
+      }
+    }
+
+    // For other errors, use your existing reconnect strategy
+    scheduleReconnect();
+  });
 }
 
 function scheduleReconnect() {
@@ -128,15 +140,15 @@ export function initNotifySocket(userId, token, onIncomingCall, onChatMessage) {
   if (notifySocket) return notifySocket; // Reuse existing
 
   isManuallyDisconnected = false;
-  notifySocket = io(socketURL + "/notify", {
+  notifySocket = io(socketURL + '/notify', {
     auth: { token },
     reconnectionAttempts: 5,
     reconnectionDelay: 3000,
   });
 
-  notifySocket.on("connect", () => {
-    notifySocket.emit("register", userId);
-    console.log("Notify socket connected");
+  notifySocket.on('connect', () => {
+    notifySocket.emit('register', userId);
+    console.log('Notify socket connected');
   });
 
   setupListeners(onIncomingCall, onChatMessage);
@@ -155,7 +167,7 @@ async function createCallSession(calleeId) {
 
     return data;
   } catch (error) {
-    console.error("Error creating call session:", error);
+    console.error('Error creating call session:', error);
     throw error;
   }
 }
@@ -163,31 +175,31 @@ async function createCallSession(calleeId) {
 export async function startCall(targetUserId) {
   try {
     const token = await getAccessToken();
-    const session = await createCallSession(targetUserId);
-
+    const { session } = await createCallSession(targetUserId);
+    console.log('Call session created:', session);
     navigate(STACK_ROUTES.VOICE_CALL, {
       token,
       room: session.room,
       isCaller: true,
     });
   } catch (error) {
-    console.error("Failed to start call:", error.message);
+    console.error('Failed to start call:', error.message);
   }
 }
 
 export function acceptCall(sessionId) {
-  if (!notifySocket) return console.warn("Socket not initialized");
-  notifySocket.emit("call:accept", { sessionId });
+  if (!notifySocket) return console.warn('Socket not initialized');
+  notifySocket.emit('call:accept', { sessionId });
 }
 
 export function rejectCall(sessionId) {
-  if (!notifySocket) return console.warn("Socket not initialized");
-  notifySocket.emit("call:reject", { sessionId });
+  if (!notifySocket) return console.warn('Socket not initialized');
+  notifySocket.emit('call:reject', { sessionId });
 }
 
 export function sendChatMessage(toUserId, message) {
-  if (!notifySocket) return console.warn("Socket not initialized");
-  notifySocket.emit("chat_message", { to: toUserId, message });
+  if (!notifySocket) return console.warn('Socket not initialized');
+  notifySocket.emit('chat_message', { to: toUserId, message });
 }
 
 export function disconnectNotifySocket() {
@@ -195,7 +207,7 @@ export function disconnectNotifySocket() {
   if (notifySocket) {
     notifySocket.disconnect();
     notifySocket = null;
-    console.log("Notify socket disconnected");
+    console.log('Notify socket disconnected');
   }
 }
 
