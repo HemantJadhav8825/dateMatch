@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
+const USER_KEY = 'user';
 
 export const getLocalStorage = async (key) => {
     return await AsyncStorage.getItem(key);
@@ -23,6 +24,11 @@ export const getAccessToken = async () => {
 
 export const getRefreshToken = async () => {
   return await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
+};
+
+export const getUserFromLocalStorage = async () => {
+  const user = await AsyncStorage.getItem(USER_KEY);
+  return user ? JSON.parse(user) : null;
 };
 
 export const setTokens = async (accessToken, refreshToken) => {

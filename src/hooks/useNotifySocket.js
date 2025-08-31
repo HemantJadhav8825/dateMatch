@@ -1,7 +1,7 @@
 // src/hooks/useNotifySocket.js
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Alert, ToastAndroid, Platform } from 'react-native';
-import { getAccessToken, getLocalStorage } from '../utils';
+import { getAccessToken, getLocalStorage, getUserFromLocalStorage } from '../utils';
 import {
   initNotifySocket,
   disconnectNotifySocket,
@@ -33,8 +33,8 @@ export function useNotifySocket() {
   const connectSocket = async token => {
     if (socketInitialized.current || !token) return;
     try {
-      const userId = await getLocalStorage('user')
-      console.log('Fetched userId from local storage:', userId);
+      const userId = (await getUserFromLocalStorage())?._id;
+
       if (!userId) {
         console.warn('User ID not found in local storage.');
         return;
