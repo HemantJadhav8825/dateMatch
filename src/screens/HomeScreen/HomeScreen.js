@@ -8,9 +8,10 @@ import RenderAvatar from './homeComponents/RenderAvatar';
 import RenderRoom from './homeComponents/RenderRoom';
 import axiosClient from '../../api/axiosClient';
 import { GET_ALL_USERS } from '../../api/endpoints';
-import { useSelector } from 'react-redux';
+// import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../store/slices/userSlice';
+import { getUserFromLocalStorage } from '../../utils';
 
 const HomeScreen = () => {
   const { theme } = useContext(ThemeContext);
@@ -18,9 +19,15 @@ const HomeScreen = () => {
   const [allUsers, setAllUsers] = useState([]);
   const dispatch = useDispatch();
 
-  const { me } = useSelector(state => state.user);
+  // const { me } = useSelector(state => state.user);
 
-  console.log('Me from Redux:', me);
+  useEffect(() => {
+    (async () => {
+      const user = await getUserFromLocalStorage();
+      if (!user) return console.log('No user found in local storage');
+      dispatch(setUser(user));
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
