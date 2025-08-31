@@ -33,7 +33,8 @@ export function useNotifySocket() {
   const connectSocket = async token => {
     if (socketInitialized.current || !token) return;
     try {
-      const userId = await getLocalStorage('userId');
+      const userId = await getLocalStorage('user')
+      console.log('Fetched userId from local storage:', userId);
       if (!userId) {
         console.warn('User ID not found in local storage.');
         return;

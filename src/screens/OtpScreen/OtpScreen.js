@@ -49,8 +49,7 @@ const OtpScreen = ({ route = {} }) => {
       });
 
       if (data?.accessToken && data?.refreshToken) {
-        // Only store userId if needed
-        await setLocalStorage('userId', data?.user?._id);
+        await setLocalStorage('user', data?.user);
 
         // Let AuthProvider handle tokens and auth state
         await login(data.accessToken, data.refreshToken);

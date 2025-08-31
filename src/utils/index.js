@@ -6,6 +6,10 @@ export const getLocalStorage = async (key) => {
     return await AsyncStorage.getItem(key);
 }
 export const setLocalStorage = async (key, value) => {
+    const isString = typeof value === 'string';
+    if (!isString) {
+        value = JSON.stringify(value);
+    }
     await AsyncStorage.setItem(key, value);
 }
 

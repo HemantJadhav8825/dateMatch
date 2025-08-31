@@ -45,8 +45,8 @@ notifySocket.on("connect_error", async (error) => {
     console.warn("Unauthorized socket connection. Logging out...");
 
     try {
-      await clearTokens();               // Clear token
-      await removeLocalStorage('userId'); // Clear userId
+      await clearTokens();
+      await removeLocalStorage('user');
     } catch (e) {
       console.error("Failed to clear local storage:", e);
     }
@@ -91,7 +91,7 @@ notifySocket.on("connect_error", async (error) => {
 
       try {
         await clearTokens();
-        await removeLocalStorage('userId');
+        await removeLocalStorage('user');
       } catch (clearErr) {
         console.error("Failed to clear local storage:", clearErr);
       }

@@ -1,18 +1,26 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import createStyles from './styles';
-import { avatars, roomTypes } from "../../constants/homeScreenConstants";
+import { avatars, roomTypes } from '../../constants/homeScreenConstants';
 import { ThemeContext } from '../../theme/ThemeContext';
 
 import RenderAvatar from './homeComponents/RenderAvatar';
 import RenderRoom from './homeComponents/RenderRoom';
 import axiosClient from '../../api/axiosClient';
 import { GET_ALL_USERS } from '../../api/endpoints';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../store/slices/userSlice';
 
 const HomeScreen = () => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme);
   const [allUsers, setAllUsers] = useState([]);
+  const dispatch = useDispatch();
+
+  const { me } = useSelector(state => state.user);
+
+  console.log('Me from Redux:', me);
 
   useEffect(() => {
     (async () => {
@@ -20,20 +28,22 @@ const HomeScreen = () => {
         const { data } = await axiosClient.get(GET_ALL_USERS);
         setAllUsers(data?.users);
       } catch (error) {
-        console.error("Error in Home Screen useEffect:GET_ALL_USERS", error);
+        console.error('Error in Home Screen useEffect:GET_ALL_USERS', error);
       }
     })();
   }, []);
 
-  console.log("All Users:", allUsers);
+  console.log('All Users:', allUsers);
 
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Private Training</Text>
       <FlatList
         data={allUsers}
-        renderItem={({ item }) => <RenderAvatar key={item?._id} user={item} styles={styles} />}
-        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => (
+          <RenderAvatar key={item?._id} user={item} styles={styles} />
+        )}
+        keyExtractor={item => item._id}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 15 }}
@@ -42,8 +52,10 @@ const HomeScreen = () => {
       <Text style={styles.sectionTitle}>All Room Types</Text>
       <FlatList
         data={roomTypes}
-        renderItem={({ item }) => <RenderRoom key={item?.id} item={item} styles={styles} />}
-        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <RenderRoom key={item?.id} item={item} styles={styles} />
+        )}
+        keyExtractor={item => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 15 }}
@@ -51,8 +63,10 @@ const HomeScreen = () => {
       <Text style={styles.sectionTitle}>Other Room Types</Text>
       <FlatList
         data={roomTypes}
-        renderItem={({ item }) => <RenderRoom key={item?.id} item={item} styles={styles} />}
-        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <RenderRoom key={item?.id} item={item} styles={styles} />
+        )}
+        keyExtractor={item => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 15 }}
