@@ -7,11 +7,8 @@ import {
   clearTokens,
   getAccessToken,
   removeLocalStorage,
-  getRefreshToken,
-  setTokens,
 } from '../utils';
 import { CREATE_CALL_SESSION } from '../api/endpoints';
-import { baseURL } from '../env/allEnv';
 import { STACK_ROUTES } from '../constants/routes';
 
 let notifySocket = null;
@@ -74,50 +71,25 @@ function setupListeners(onIncomingCall, onChatMessage) {
     console.error('Socket connection error:', error?.message);
 
     if (error?.message === 'unauthorized') {
-      console.warn(
-        'Unauthorized socket connection. Attempting token refresh...',
-      );
+      console.warn('Unauthorized socket connection. Logging out...');
 
       try {
-        const refreshToken = await getRefreshToken();
-        if (!refreshToken) throw new Error('No refresh token found');
-
-        // Attempt refresh
-        const response = await axios.post(`${baseURL}/auth/token/refresh`, {
-          refreshToken,
-        });
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-        // Save new tokens
-        await setTokens(accessToken, newRefreshToken);
-
-        // Reconnect socket with new token
-        notifySocket.auth = { token: accessToken };
-        notifySocket.connect();
-
-        return; // Don't log out, refresh succeeded
-      } catch (e) {
-        console.error(
-          'Token refresh failed during socket reconnect:',
-          e?.response?.data || e.message,
-        );
-
-        try {
-          await clearTokens();
-          await removeLocalStorage('user');
-        } catch (clearErr) {
-          console.error('Failed to clear local storage:', clearErr);
-        }
-
-        isManuallyDisconnected = true;
-        if (notifySocket) {
-          notifySocket.disconnect();
-          notifySocket = null;
-        }
-
-        navigate(STACK_ROUTES.LOGIN);
-        return;
+        // Clear tokens and user data
+        await clearTokens();
+      } catch (clearErr) {
+        console.error('Failed to clear local storage:', clearErr);
       }
+
+      // Disconnect socket and prevent reconnection
+      isManuallyDisconnected = true;
+      if (notifySocket) {
+        notifySocket.disconnect();
+        notifySocket = null;
+      }
+
+      // Redirect to login page
+      navigate(STACK_ROUTES.LOGIN);
+      return;
     }
 
     // For other errors, use your existing reconnect strategy

@@ -1,8 +1,7 @@
 // services/axiosClient.js
 import axios from 'axios';
 import { baseURL } from '../env/allEnv';
-import { getAccessToken, getRefreshToken } from '../utils/index';
-import { refreshTokenFlow, addRefreshSubscriber } from '../utils/tokenUtils';
+import { getAccessToken } from '../utils/index';
 import { navigate } from '../components/RootNavigation';
 import { STACK_ROUTES } from '../constants/routes';
 
@@ -33,26 +32,10 @@ axiosClient.interceptors.response.use(
   },
   async (error) => {
     console.error('🔁 Response err:', error?.response?.data || error.message);
-    const accessToken = await getAccessToken();
-    const refreshToken = await getRefreshToken();
-    if (!accessToken || !refreshToken) {
+
+    // Directly redirect to login if unauthorized
+    if (error.response?.status === 401) {
       navigate(STACK_ROUTES.LOGIN);
-      return Promise.reject(error);
-    }
-    const originalRequest = error.config;
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      return new Promise((resolve, reject) => {
-        addRefreshSubscriber((newToken) => {
-          if (!newToken) return reject(error);
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          resolve(axiosClient(originalRequest));
-        });
-
-        refreshTokenFlow().catch(reject);
-      });
     }
 
     return Promise.reject(error);
