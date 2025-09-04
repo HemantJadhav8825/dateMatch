@@ -39,7 +39,7 @@ export const setTokens = async (accessToken, refreshToken) => {
 };
 
 export const clearTokens = async () => {
-  await AsyncStorage.multiRemove([ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY]);
+  await AsyncStorage.multiRemove([ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]);
 };
 
 export { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY };
