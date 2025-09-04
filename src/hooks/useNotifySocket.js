@@ -1,49 +1,71 @@
 // src/hooks/useNotifySocket.js
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { AppState } from 'react-native';
-import { getAccessToken, getUserFromLocalStorage } from '../utils';
+import { useEffect, useRef, useState } from 'react';
+import { AppState, Alert, ToastAndroid, Platform } from 'react-native';
+import { getAccessToken, getLocalStorage, getUserFromLocalStorage } from '../utils';
 import {
   initNotifySocket,
   disconnectNotifySocket,
-  getNotifySocket
+  isNotifySocketAlive,
 } from '../components/CallNotifier';
+import { showIncomingCallUI } from '../components/ShowIncomingCallUI';
+import Toast from 'react-native-toast-message';
 
 export function useNotifySocket() {
   const [loading, setLoading] = useState(true);
-  const [socketStatus, setSocketStatus] = useState('disconnected'); // 'connected' | 'reconnecting' | 'disconnected'
   const [accessToken, setAccessToken] = useState(null);
   const appState = useRef(AppState.currentState);
   const socketInitialized = useRef(false);
   const userIdRef = useRef(null);
 
-  const setupSocketListeners = (socket) => {
-    socket.on('connect', () => setSocketStatus('connected'));
-    socket.on('disconnect', () => setSocketStatus('disconnected'));
-    socket.on('reconnect_attempt', () => setSocketStatus('reconnecting'));
-    socket.on('connect_error', () => setSocketStatus('disconnected'));
+  const showReconnectionError = message => {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(message, ToastAndroid.LONG);
+    } else {
+      Toast.show({
+        position: 'bottom',
+        type: 'success',
+        text1: 'Reconnection Failed',
+        text2: message,
+      });
+    }
   };
 
-  const connectSocket = useCallback(async (token) => {
+  const connectSocket = async token => {
     if (socketInitialized.current || !token) return;
     try {
       const userId = (await getUserFromLocalStorage())?._id;
-      if (!userId) return console.warn('User ID not found in local storage.');
 
+      if (!userId) {
+        console.warn('User ID not found in local storage.');
+        return;
+      }
       userIdRef.current = userId;
-      const socket = initNotifySocket(userId, token, () => {}, () => {});
-      setupSocketListeners(socket);
+
+      initNotifySocket(
+        userId,
+        token,
+        callData => {
+          showIncomingCallUI(callData);
+        },
+        chatMessage => {
+          console.log('New chat message:', chatMessage);
+        },
+      );
 
       socketInitialized.current = true;
+      console.log('Socket connected successfully');
     } catch (error) {
       console.error('Socket connection error:', error);
-      setSocketStatus('disconnected');
+      showReconnectionError(
+        'Unable to reconnect to server. Calls and chat may not work.',
+      );
     }
-  }, []);
+  };
 
   useEffect(() => {
     let isMounted = true;
 
-    (async () => {
+    const initialize = async () => {
       try {
         const token = await getAccessToken();
         if (!isMounted) return;
@@ -52,54 +74,71 @@ export function useNotifySocket() {
         if (token) {
           await connectSocket(token);
         }
+      } catch (error) {
+        console.error('Initialization failed:', error);
+        Toast.show({
+          position: 'bottom',
+          type: 'success',
+          text1: 'Initialization failed',
+          text2: 'Please try restarting the app.',
+        });
       } finally {
         if (isMounted) setLoading(false);
       }
-    })();
+    };
+
+    initialize();
 
     return () => {
       isMounted = false;
     };
-  }, [connectSocket]);
+  }, []);
 
-  // App resume handling
+  // Handle app state changes for reconnection
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', async nextAppState => {
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+    const handleAppStateChange = async nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
         if (accessToken && userIdRef.current) {
-          setSocketStatus('reconnecting');
+          console.log('App resumed. Reconnecting socket...');
           socketInitialized.current = false;
-          await connectSocket(accessToken);
+          try {
+            await connectSocket(accessToken);
+          } catch {
+            showReconnectionError(
+              'Reconnection failed. Please check your internet.',
+            );
+          }
         }
       }
       appState.current = nextAppState;
-    });
-    return () => subscription.remove();
-  }, [accessToken, connectSocket]);
+    };
 
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+    return () => subscription.remove();
+  }, [accessToken]);
+
+  // Disconnect on unmount
   useEffect(() => {
     return () => {
       disconnectNotifySocket();
-      setSocketStatus('disconnected');
     };
   }, []);
 
-const manualReconnect = useCallback(async () => {
-  let socket = getNotifySocket();
-  console.log('Manual reconnect triggered', socket);
+  // Health check
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isNotifySocketAlive()) {
+        console.warn('Socket is not live! Attempting reconnection...');
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
-  if (socket?.connected) {
-    // Re-attach listeners in case they were lost
-    setupSocketListeners(socket);
-    setSocketStatus('connected'); // Force sync
-    return;
-  }
-
-  setSocketStatus('reconnecting');
-  socketInitialized.current = false;
-  await connectSocket(accessToken);
-}, [accessToken, connectSocket]);
-
-
-  return { loading, socketStatus, manualReconnect };
+  return { loading };
 }

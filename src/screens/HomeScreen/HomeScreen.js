@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import createStyles from './styles';
 import { avatars, roomTypes } from '../../constants/homeScreenConstants';
 import { ThemeContext } from '../../theme/ThemeContext';
@@ -12,15 +12,13 @@ import { GET_ALL_USERS } from '../../api/endpoints';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../store/slices/userSlice';
 import { getUserFromLocalStorage } from '../../utils';
-import SocketStatusIndicator from '../../components/SocketStatusIndicator';
-import { useNotifySocket } from '../../hooks/useNotifySocket';
 
 const HomeScreen = () => {
   const { theme } = useContext(ThemeContext);
   const styles = createStyles(theme);
   const [allUsers, setAllUsers] = useState([]);
   const dispatch = useDispatch();
-  const { socketStatus, manualReconnect } = useNotifySocket();
+
   // const { me } = useSelector(state => state.user);
 
   useEffect(() => {
@@ -46,27 +44,6 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          paddingHorizontal: 15,
-        }}
-      >
-        <SocketStatusIndicator status={socketStatus} />
-        {socketStatus === 'disconnected' && (
-          <TouchableOpacity
-            onPress={manualReconnect}
-            style={{
-              padding: 6,
-              backgroundColor: theme.colors.primary,
-              borderRadius: 8,
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Reconnect</Text>
-          </TouchableOpacity>
-        )}
-      </View>
       <Text style={styles.sectionTitle}>Private Training</Text>
       <FlatList
         data={allUsers}
